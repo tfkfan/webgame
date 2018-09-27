@@ -1,0 +1,48 @@
+group 'web'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'org.akhikhl.gretty'
+
+
+sourceCompatibility = 1.8
+
+repositories {
+    maven {
+        url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/'
+    }
+    mavenCentral()
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+}
+
+buildscript {
+    repositories {
+        maven {
+            url 'http://oss.jfrog.org/artifactory/oss-snapshot-local/'
+        }
+        jcenter()
+    }
+    dependencies {
+        classpath 'org.akhikhl.gretty:gretty:1.1.7-SNAPSHOT'
+    }
+}
+
+subprojects {
+    apply plugin: 'org.akhikhl.gretty'
+
+    gretty {
+        scanInterval = 1 //Scan for changes every second
+        host = '0.0.0.0' //Enable network access from outside your local machine
+        servletContainer = 'jetty7' //Use Jetty7 which is compatible with JDK6
+        managedClassReload = true //Activate spring-loaded class reloading
+        integrationTestTask = 'integrationTest'
+    }
+
+    sourceCompatibility = 1.5
+    version = '1.0'
+}
+
+
