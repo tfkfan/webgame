@@ -12,39 +12,50 @@ class MainScene extends Phaser.Scene{
     }
 
     create(){
-           this.lastFired=0;
+        var _THIS = this;
+        this.lastFired=0;
 
-           this.cameras.main.setBounds(0, 0, 3200, 3200);
-           this.createStarfield();
+        this.cameras.main.setBounds(0, 0, 3200, 3200);
+        this.createStarfield();
 
-           this.bullets = this.add.group({ classType: Bullet, runChildUpdate: true });
+        this.bullets = this.add.group({ classType: Bullet, runChildUpdate: true });
 
-           this.player = this.add.sprite(1600, 200, 'mage');
-           this.cursors = this.input.keyboard.createCursorKeys();
-           this.text = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' }).setDepth(1).setScrollFactor(0);
+        this.player = this.add.sprite(1600, 200, 'mage');
+        this.cursors = this.input.keyboard.createCursorKeys();
+        this.text = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' }).setDepth(1).setScrollFactor(0);
 
-           this.anims.create({ key: 'up', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 4, zeroPad: 2 }), repeat: -1 });
-           this.anims.create({ key: 'standing_up', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 0, zeroPad: 2 }), repeat: -1 });
+        this.anims.create({ key: 'up', frames:
+             this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 4, zeroPad: 2 }), repeat: -1 });
+        this.anims.create({ key: 'standing_up', frames:
+             this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 0, zeroPad: 2 }), repeat: -1 });
 
-           this.anims.create({ key: 'upright', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 4, zeroPad: 2 }), repeat: -1 });
-           this.anims.create({ key: 'standing_upright', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 0, zeroPad: 2 }), repeat: -1 });
+        this.anims.create({ key: 'upright', frames:
+             this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 4, zeroPad: 2 }), repeat: -1 });
+        this.anims.create({ key: 'standing_upright', frames:
+             this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 0, zeroPad: 2 }), repeat: -1 });
 
-           this.anims.create({ key: 'right', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 4, zeroPad: 2 }), repeat: -1 });
-           this.anims.create({ key: 'standing_right', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 0, zeroPad: 2 }), repeat: -1 });
+        this.anims.create({ key: 'right', frames:
+             this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 4, zeroPad: 2 }), repeat: -1 });
+        this.anims.create({ key: 'standing_right', frames:
+             this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 0, zeroPad: 2 }), repeat: -1 });
+
+        this.game.canvas.addEventListener('mousedown', function () {
+            var bullet = _THIS.bullets.get();
+            bullet.setActive(true);
+            bullet.setVisible(true);
+
+            var globalPosition = game.input.activePointer;
+            if (bullet)
+                bullet.fire(_THIS.player, new Phaser.Math.Vector2(globalPosition.worldX,globalPosition.worldY));
+        });
 
 
-           this.player.properties = {
-             currentDir: "up",
-             isMoving: false
-           };
+       this.player.properties = {
+         currentDir: "up",
+         isMoving: false
+       };
 
-           this.player.play('standing_up');
+       this.player.play('standing_up');
     }
 
     updatePlayer(velocity){
@@ -107,16 +118,7 @@ class MainScene extends Phaser.Scene{
 
         this.updatePlayer(vel);
 
-        if (this.cursors.space.isDown && time > this.lastFired){
-            var bullet = this.bullets.get();
-            bullet.setActive(true);
-            bullet.setVisible(true);
 
-            if (bullet){
-                bullet.fire(this.player);
-                this.lastFired = time + 100;
-            }
-        }
 
         this.text.setText(this.player.x + "/" + this.player.y);
 
