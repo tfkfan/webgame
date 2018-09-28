@@ -6,8 +6,6 @@ class Player extends Phaser.GameObjects.Sprite{
        //default settings
        this.currentDir = "up";
        this.isMoving = false;
-       this.isAttack = false;
-       this.attackTime = 0;
 
        this.init();
     }
@@ -35,7 +33,7 @@ class Player extends Phaser.GameObjects.Sprite{
     }
 
     attack(target){
-        this.play("attack_up");
+        this.play("attack_" + this.currentDir);
     }
 
     update(time, delta){
@@ -83,8 +81,5 @@ class Player extends Phaser.GameObjects.Sprite{
         this.velocity = velocity;
         this.x+=velocity.x;
         this.y+=velocity.y;
-
     }
-
-
 }

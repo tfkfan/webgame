@@ -18,14 +18,18 @@ class MainScene extends Phaser.Scene{
         this.cameras.main.setBounds(0, 0, 3200, 3200);
         this.createStarfield();
 
-        this.bullets = this.add.group({ classType: Bullet, runChildUpdate: true });
+        this.skills = this.add.group({
+            runChildUpdate: true,
+            maxSize: 100
+        });
 
         this.player = new Player(this, 1600, 200, 'mage');
         this.cursors = this.input.keyboard.createCursorKeys();
         this.text = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' }).setDepth(1).setScrollFactor(0);
 
         this.game.canvas.addEventListener('mousedown', function () {
-            var bullet = _THIS.bullets.get();
+            _THIS.skills.classType = Bullet;
+            var bullet = _THIS.skills.get();
             bullet.setActive(true);
             bullet.setVisible(true);
 
@@ -34,7 +38,7 @@ class MainScene extends Phaser.Scene{
                 bullet.fire(_THIS.player, new Phaser.Math.Vector2(globalPosition.worldX,globalPosition.worldY));
         });
 
-       this.player.play('standing_up');
+        this.player.play('standing_up');
     }
 
     update(time, delta) {
