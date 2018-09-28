@@ -12,36 +12,7 @@ class MainScene extends Phaser.Scene{
     }
 
     create(){
-        var Bullet = new Phaser.Class({
-               Extends: Phaser.GameObjects.Image,
-
-               initialize:
-               function Bullet (scene) {
-                   Phaser.GameObjects.Image.call(this, scene, 0, 0, 'bullet');
-                   this.speed = 0;
-                   this.born = 0;
-               },
-
-               fire: function (player){
-                   this.setPosition(player.x, player.y);
-                   if (player.flipX)
-                       this.speed = Phaser.Math.GetSpeed(-1000 + player.vel.x, 1);
-                   else
-                       this.speed = Phaser.Math.GetSpeed(1000 + player.vel.x, 1);
-                   this.born = 0;
-               },
-
-               update: function (time, delta){
-                   this.x += this.speed * delta;
-                   this.born += delta;
-                   if (this.born > 1000){
-                       this.setActive(false);
-                       this.setVisible(false);
-                   }
-               }
-           });
-
-            this.lastFired=0;
+           this.lastFired=0;
 
            this.cameras.main.setBounds(0, 0, 3200, 3200);
            this.createStarfield();
@@ -115,6 +86,7 @@ class MainScene extends Phaser.Scene{
             this.player.properties.isMoving = isMoving;
         }
 
+        this.player.velocity = velocity;
         this.player.x+=velocity.x;
         this.player.y+=velocity.y;
     }
@@ -132,10 +104,6 @@ class MainScene extends Phaser.Scene{
             vel.y = -acc;
         else if (this.cursors.down.isDown)
             vel.y = acc;
-
-        if(vel.x != 0 && vel.y != 0){
-            console.log("ok")
-        }
 
         this.updatePlayer(vel);
 
