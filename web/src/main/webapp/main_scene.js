@@ -53,59 +53,91 @@ class MainScene extends Phaser.Scene{
            this.text = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' }).setDepth(1).setScrollFactor(0);
 
            this.anims.create({ key: 'up', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 5, zeroPad: 2 }), repeat: -1 });
+                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 4, zeroPad: 2 }), repeat: -1 });
            this.anims.create({ key: 'standing_up', frames:
-                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 1, zeroPad: 2 }), repeat: -1 });
+                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 0, zeroPad: 2 }), repeat: -1 });
 
-           this.player.dirs= {
-             up: false,
-             left: false,
-             right: false,
-             down: false,
-             standing: true,
-             clearDirections: function(){
-                this.up = this.left = this.right = this.down = false;
-                this.standing = true;
-             }
+           this.anims.create({ key: 'upright', frames:
+                this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 4, zeroPad: 2 }), repeat: -1 });
+           this.anims.create({ key: 'standing_upright', frames:
+                this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 0, zeroPad: 2 }), repeat: -1 });
+
+           this.anims.create({ key: 'right', frames:
+                this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 4, zeroPad: 2 }), repeat: -1 });
+           this.anims.create({ key: 'standing_right', frames:
+                this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 0, zeroPad: 2 }), repeat: -1 });
+
+
+           this.player.properties = {
+             currentDir: "up",
+             isMoving: false
            };
 
-           this.player.play('up');
+           this.player.play('standing_up');
+    }
+
+    updatePlayer(velocity){
+        var directionState = this.player.properties.currentDir;
+        var isMoving = true;
+
+        if (velocity.x > 0 && velocity.y < 0)
+            directionState = "upright";
+        else if (velocity.x > 0 && velocity.y > 0)
+            directionState = "rightdown";
+        else if (velocity.x < 0 && velocity.y < 0)
+            directionState = "upleft";
+        else if (velocity.x < 0 && velocity.y > 0)
+            directionState = "leftdown";
+        else  if(velocity.y == 0 && velocity.x > 0)
+            directionState = "right";
+        else if(velocity.y == 0 && velocity.x < 0)
+            directionState = "left";
+        else if(velocity.x == 0 && velocity.y < 0)
+            directionState = "up";
+        else if(velocity.x == 0 && velocity.y > 0)
+            directionState = "down";
+        else{
+            //standing
+            isMoving = false;
+        }
+
+        if(directionState != this.player.properties.currentDir){
+            this.player.play(directionState);
+            this.player.properties.currentDir = directionState;
+        }
+
+
+        if(isMoving != this.player.properties.isMoving){
+            if(!isMoving)
+                 this.player.play("standing_" + directionState);
+            else
+               this.player.play(directionState);
+            this.player.properties.isMoving = isMoving;
+        }
+
+        this.player.x+=velocity.x;
+        this.player.y+=velocity.y;
     }
 
     update(time, delta) {
         var acc = 10;
-        dirs = {
-            up: false,
-            left: false,
-            right: false,
-            down: false,
-            standing: true,
-        };
-        if (this.cursors.left.isDown){
-            this.player.x-=acc;
-            dirs.left = true;
-        }
-        else if (this.cursors.right.isDown){
-            this.player.x+=acc;
-            dirs.right = true;
-        }
+        var vel = {x:0, y:0};
 
+        if (this.cursors.left.isDown)
+            vel.x = -acc;
+        else if (this.cursors.right.isDown)
+            vel.x = acc;
 
-        if (this.cursors.up.isDown){
-            this.player.y-=acc;
-            verticalDir = 1;
-        }
-        else if (this.cursors.down.isDown){
-            this.player.y+=acc;
-            verticalDir = -1;
+        if (this.cursors.up.isDown)
+            vel.y = -acc;
+        else if (this.cursors.down.isDown)
+            vel.y = acc;
+
+        if(vel.x != 0 && vel.y != 0){
+            console.log("ok")
         }
 
-
-        if(!this.player.dirs.up && verticalDir == 1 && horizontalDir == 0 ){
-            this.player.dirs.clearDirections();
-            this.player.play('up');
-        }
-
+        this.updatePlayer(vel);
 
         if (this.cursors.space.isDown && time > this.lastFired){
             var bullet = this.bullets.get();
@@ -118,17 +150,7 @@ class MainScene extends Phaser.Scene{
             }
         }
 
-        //  Emitters to bullets
-        this.bullets.children.each(function(b) {
-           /* if (b.active){
-                this.flares.setPosition(b.x, b.y);
-                this.flares.setSpeed(b.speed + 500 * -1);
-                this.flares.emitParticle(1);
-            }*/
-        }, this);
-
         this.text.setText(this.player.x + "/" + this.player.y);
-
 
         this.cameras.main.scrollX = this.player.x - 400;
         this.cameras.main.scrollY = this.player.y - 300;
