@@ -1,13 +1,4 @@
-// Credits:
-// http://www.gamedevacademy.org/html5-phaser-tutorial-spacehipster-a-space-exploration-game/
-// http://www.joshmorony.com/how-to-create-an-animated-character-using-sprites-in-phaser/
-// http://jschomay.tumblr.com/post/103568304133/tutorial-building-a-polished-html5-space-shooter
-// http://ezelia.com/2014/tutorial-creating-basic-multiplayer-game-phaser-eureca-io
-
-Theodoric.Game = function (game) {
-
-    //  When a State is added to Phaser it automatically has the following properties set on it, even if they already exist:
-
+WebGame.Game = function (game) {
     this.game;      //  a reference to the currently running game (Phaser.Game)
     this.add;       //  used to add sprites, text, groups, etc (Phaser.GameObjectFactory)
     this.camera;    //  a reference to the game camera (Phaser.Camera)
@@ -24,26 +15,16 @@ Theodoric.Game = function (game) {
     this.particles; //  the particle manager (Phaser.Particles)
     this.physics;   //  the physics manager (Phaser.Physics)
     this.rnd;       //  the repeatable random number generator (Phaser.RandomDataGenerator)
-
-    //  You can use any of these from any function within this State.
-    //  But do consider them as being 'reserved words', i.e. don't create a property for your own game called 'world' or you'll over-write the world reference.
 };
 
-Theodoric.Game.prototype = {
-
-    // Runs once at start of game
+WebGame.Game.prototype = {
     create: function () {
-
-        // Generate in order of back to front
         var worldSize = 1920;
         this.game.world.setBounds(0, 0, worldSize, worldSize);
-
         this.background = this.game.add.tileSprite(0, 0, this.game.world.width / 2, this.game.world.height / 2, 'tiles', 65);
         this.background.scale.setTo(2);
-
         this.generateGrid(worldSize);
 
-        // Initialize data
         this.notification = '';
         this.spellCooldown = 0;
         this.gold = 0;
@@ -53,37 +34,28 @@ Theodoric.Game.prototype = {
         this.bossSpawned = false;
         this.bossColorIndex = 0;
 
-        // Generate objects
-        this.generateObstacles();
+       // this.generateObstacles();
         this.generateCollectables();
-
         this.corpses = this.game.add.group();
-
         // Generate player and set camera to follow
         this.player = this.generatePlayer();
         this.game.camera.follow(this.player);
-
         this.playerAttacks = this.generateAttacks('sword', 1);
         this.playerSpells = this.generateAttacks('spell', 1);
         this.bossAttacks = this.generateAttacks('spellParticle', 5,2000, 300);
         this.bossAttacks = this.generateAttacks('fireball', 1, 2000, 300);
-
         // Generate enemies - must be generated after player and player.level
-        this.generateEnemies(100);
-
+        this.generateEnemies(2);
         // Generate bosses
         this.bosses = this.game.add.group();
         this.bosses.enableBody = true;
         this.bosses.physicsBodyType = Phaser.Physics.ARCADE;
-
         // Music
 		this.music = this.game.add.audio('overworldMusic');
 		this.music.loop = true;
 		this.music.play();
-
         // Sound effects
         this.generateSounds();
-
         // Set the controls
         this.controls = {
             up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -92,23 +64,18 @@ Theodoric.Game.prototype = {
             right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),
             spell: this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
         };
-
         // Set the camera
         this.showLabels();
     },
-
     // Checks for actions and changes
     update: function () {
-
         this.playerHandler();
         this.enemyHandler();
         this.bossHandler();
         this.collisionHandler();
-
         this.collectables.forEachDead(function(collectable) {
             collectable.destroy();
         });
-
         this.notificationLabel.text = this.notification;
         this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.xp + ' XP / ' + this.xpToNext + ' XP';
         this.goldLabel.text = this.gold + ' Gold';
@@ -116,16 +83,13 @@ Theodoric.Game.prototype = {
     },
 
     playerHandler: function() {
-
         if (this.player.alive) {
             this.playerMovementHandler();
-
             // Attack towards mouse click
             if (this.game.input.activePointer.isDown) {
                 this.playerAttacks.rate = 1000 - (this.player.speed * 4);
-                    if (this.playerAttacks.rate < 200) {
+                    if (this.playerAttacks.rate < 200)
                         this.playerAttacks.rate = 200;
-                    }
                 this.playerAttacks.range = this.player.strength * 3;
                 this.attack(this.player, this.playerAttacks);
             }
@@ -183,7 +147,6 @@ Theodoric.Game.prototype = {
     },
 
     bossHandler: function() {
-
         // Spawn boss if player obtains enough gold
         if (this.gold > this.goldForBoss && !this.bossSpawned) {
             this.bossSpawned = true;
@@ -426,16 +389,13 @@ Theodoric.Game.prototype = {
     },
 
     generatePlayer: function () {
+        var player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'mage');
 
-        // Generate the player
-        var player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'characters');
-
-        // Loop through frames 3, 4, and 5 at 10 frames a second while the animation is playing
-        player.animations.add('down', [3, 4, 5], 10, true);
-        player.animations.add('left', [15, 16, 17], 10, true);
-        player.animations.add('right', [27, 28, 29], 10, true);
-        player.animations.add('up', [39, 40, 41], 10, true);
-        player.animations.play('down');
+        player.animations.add('down',[5,6,7,8,9], 10, true);
+        player.animations.add('left',[5,6,7,8,9], 10, true);
+        player.animations.add('right',[5,6,7,8,9], 10, true);
+        player.animations.add('up',[0,1,2,3,4], 10, true);
+        player.animations.play('up');
         player.scale.setTo(2);
 
         // Enable player physics;

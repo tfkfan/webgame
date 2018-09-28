@@ -2,7 +2,7 @@
 var WebGame = WebGame || {};
 // Initiate a new game and set the size of the entire windows
 // Phaser.AUTO means that whether the game will be rendered on a CANVAS element or using WebGL will depend on the browser
-WebGame.game = new Phaser.Game(512, 384, Phaser.AUTO, '', null, false, false);
+WebGame.game = new Phaser.Game(1200, 800, Phaser.AUTO, '', null, false, false);
 
 WebGame.game.state.add('Boot', WebGame.Boot);
 WebGame.game.state.add('Preloader', WebGame.Preloader);
