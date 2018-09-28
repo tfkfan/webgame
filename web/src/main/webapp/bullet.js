@@ -16,6 +16,8 @@ class Bullet extends Phaser.GameObjects.Sprite{
        this.speed = vect;
        this.target = target;
        this.born = 0;
+
+       player.attack(target);
    }
 
    update(time, delta){

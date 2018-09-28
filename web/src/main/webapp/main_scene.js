@@ -37,50 +37,6 @@ class MainScene extends Phaser.Scene{
        this.player.play('standing_up');
     }
 
-    updatePlayer(velocity){
-        var directionState = this.player.currentDir;
-        var isMoving = true;
-
-        if (velocity.x > 0 && velocity.y < 0)
-            directionState = "upright";
-        else if (velocity.x > 0 && velocity.y > 0)
-            directionState = "rightdown";
-        else if (velocity.x < 0 && velocity.y < 0)
-            directionState = "upleft";
-        else if (velocity.x < 0 && velocity.y > 0)
-            directionState = "leftdown";
-        else  if(velocity.y == 0 && velocity.x > 0)
-            directionState = "right";
-        else if(velocity.y == 0 && velocity.x < 0)
-            directionState = "left";
-        else if(velocity.x == 0 && velocity.y < 0)
-            directionState = "up";
-        else if(velocity.x == 0 && velocity.y > 0)
-            directionState = "down";
-        else{
-            //standing
-            isMoving = false;
-        }
-
-        if(directionState != this.player.currentDir){
-            this.player.play(directionState);
-            this.player.currentDir = directionState;
-        }
-
-
-        if(isMoving != this.player.isMoving){
-            if(!isMoving)
-                 this.player.play("standing_" + directionState);
-            else
-               this.player.play(directionState);
-            this.player.isMoving = isMoving;
-        }
-
-        this.player.velocity = velocity;
-        this.player.x+=velocity.x;
-        this.player.y+=velocity.y;
-    }
-
     update(time, delta) {
         var acc = 10;
         var vel = {x:0, y:0};
@@ -95,9 +51,7 @@ class MainScene extends Phaser.Scene{
         else if (this.cursors.down.isDown)
             vel.y = acc;
 
-        this.updatePlayer(vel);
-
-
+        this.player.animate(vel);
 
         this.text.setText(this.player.x + "/" + this.player.y);
 

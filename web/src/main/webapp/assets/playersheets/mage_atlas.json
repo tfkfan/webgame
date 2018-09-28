@@ -1,5 +1,44 @@
 {"frames": [
-
+{
+	"filename": "mageattackup00",
+	"frame": {"x":0,"y":305,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageattackup01",
+	"frame": {"x":0,"y":366,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":1,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageattackup02",
+	"frame": {"x":0,"y":427,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageattackup03",
+	"frame": {"x":0,"y":488,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+},{
+	"filename": "mageattackup04",
+	"frame": {"x":0,"y":0,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,
 {
 	"filename": "mageup00",
 	"frame": {"x":0,"y":0,"w":75,"h":61},
