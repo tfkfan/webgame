@@ -1,0 +1,44 @@
+{"frames": [
+
+{
+	"filename": "mageup00",
+	"frame": {"x":0,"y":0,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageup01",
+	"frame": {"x":0,"y":61,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":1,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageup02",
+	"frame": {"x":0,"y":122,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageup03",
+	"frame": {"x":0,"y":183,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}
+,{
+	"filename": "mageup04",
+	"frame": {"x":0,"y":244,"w":75,"h":61},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":2,"y":0,"w":66,"h":66},
+	"sourceSize": {"w":66,"h":66}
+}],
+"meta": {"image": "mage.png","size": {"w": 370, "h": 657},"scale": "1"}
+}

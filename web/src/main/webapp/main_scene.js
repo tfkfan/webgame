@@ -7,11 +7,8 @@ class MainScene extends Phaser.Scene{
     preload(){
         this.load.image('star', 'assets/demoscene/star2.png');
         this.load.image('bigStar', 'assets/demoscene/star3.png');
-        this.load.image('ship', 'assets/sprites/shmup-ship2.png');
-        this.load.image('bullet', 'assets/bullets/bullet237.png');
-        this.load.image('jets', 'assets/particles/blue.png');
-        this.load.image('flares', 'assets/particles/yellow.png');
-        this.load.spritesheet('face', 'assets/sprites/metalface78x92.png', { frameWidth: 78, frameHeight: 92 });
+        this.load.image('bullet', 'assets/demoscene/bullet237.png');
+        this.load.atlas('mage', 'assets/playersheets/mage.png', 'assets/playersheets/mage_atlas.json');
     }
 
     create(){
@@ -51,27 +48,63 @@ class MainScene extends Phaser.Scene{
 
            this.bullets = this.add.group({ classType: Bullet, runChildUpdate: true });
 
-           this.player = this.impact.add.sprite(1600, 200, 'ship').setDepth(1);
-           this.player.setMaxVelocity(1000).setFriction(800, 600).setPassiveCollision();
+           this.player = this.add.sprite(1600, 200, 'mage');
            this.cursors = this.input.keyboard.createCursorKeys();
            this.text = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' }).setDepth(1).setScrollFactor(0);
+
+           this.anims.create({ key: 'up', frames:
+                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 5, zeroPad: 2 }), repeat: -1 });
+           this.anims.create({ key: 'standing_up', frames:
+                this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 1, zeroPad: 2 }), repeat: -1 });
+
+           this.player.dirs= {
+             up: false,
+             left: false,
+             right: false,
+             down: false,
+             standing: true,
+             clearDirections: function(){
+                this.up = this.left = this.right = this.down = false;
+                this.standing = true;
+             }
+           };
+
+           this.player.play('up');
     }
 
     update(time, delta) {
-        var acc = 500;
-        if (this.cursors.left.isDown)
-            this.player.setVelocityX(-acc);
-        else if (this.cursors.right.isDown)
-            this.player.setVelocityX(acc);
-        else
-            this.player.setVelocityX(0);
+        var acc = 10;
+        dirs = {
+            up: false,
+            left: false,
+            right: false,
+            down: false,
+            standing: true,
+        };
+        if (this.cursors.left.isDown){
+            this.player.x-=acc;
+            dirs.left = true;
+        }
+        else if (this.cursors.right.isDown){
+            this.player.x+=acc;
+            dirs.right = true;
+        }
 
-        if (this.cursors.up.isDown)
-            this.player.setVelocityY(-acc);
-        else if (this.cursors.down.isDown)
-            this.player.setVelocityY(acc);
-        else
-            this.player.setVelocityY(0);
+
+        if (this.cursors.up.isDown){
+            this.player.y-=acc;
+            verticalDir = 1;
+        }
+        else if (this.cursors.down.isDown){
+            this.player.y+=acc;
+            verticalDir = -1;
+        }
+
+
+        if(!this.player.dirs.up && verticalDir == 1 && horizontalDir == 0 ){
+            this.player.dirs.clearDirections();
+            this.player.play('up');
+        }
 
 
         if (this.cursors.space.isDown && time > this.lastFired){

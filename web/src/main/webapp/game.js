@@ -10,7 +10,7 @@ var config = {
                     x: 0,
                     y: 0,
                     width: 3200,
-                    height: 600,
+                    height: 3200,
                     thickness: 32
                 }
             }
