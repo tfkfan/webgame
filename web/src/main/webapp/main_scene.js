@@ -20,24 +20,9 @@ class MainScene extends Phaser.Scene{
 
         this.bullets = this.add.group({ classType: Bullet, runChildUpdate: true });
 
-        this.player = this.add.sprite(1600, 200, 'mage');
+        this.player = new Player(this, 1600, 200, 'mage');
         this.cursors = this.input.keyboard.createCursorKeys();
         this.text = this.add.text(10, 10, '', { font: '16px Courier', fill: '#00ff00' }).setDepth(1).setScrollFactor(0);
-
-        this.anims.create({ key: 'up', frames:
-             this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 4, zeroPad: 2 }), repeat: -1 });
-        this.anims.create({ key: 'standing_up', frames:
-             this.anims.generateFrameNames('mage', { prefix: 'mageup', end: 0, zeroPad: 2 }), repeat: -1 });
-
-        this.anims.create({ key: 'upright', frames:
-             this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 4, zeroPad: 2 }), repeat: -1 });
-        this.anims.create({ key: 'standing_upright', frames:
-             this.anims.generateFrameNames('mage', { prefix: 'mageupright', end: 0, zeroPad: 2 }), repeat: -1 });
-
-        this.anims.create({ key: 'right', frames:
-             this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 4, zeroPad: 2 }), repeat: -1 });
-        this.anims.create({ key: 'standing_right', frames:
-             this.anims.generateFrameNames('mage', { prefix: 'mageright', end: 0, zeroPad: 2 }), repeat: -1 });
 
         this.game.canvas.addEventListener('mousedown', function () {
             var bullet = _THIS.bullets.get();
@@ -49,17 +34,11 @@ class MainScene extends Phaser.Scene{
                 bullet.fire(_THIS.player, new Phaser.Math.Vector2(globalPosition.worldX,globalPosition.worldY));
         });
 
-
-       this.player.properties = {
-         currentDir: "up",
-         isMoving: false
-       };
-
        this.player.play('standing_up');
     }
 
     updatePlayer(velocity){
-        var directionState = this.player.properties.currentDir;
+        var directionState = this.player.currentDir;
         var isMoving = true;
 
         if (velocity.x > 0 && velocity.y < 0)
@@ -83,18 +62,18 @@ class MainScene extends Phaser.Scene{
             isMoving = false;
         }
 
-        if(directionState != this.player.properties.currentDir){
+        if(directionState != this.player.currentDir){
             this.player.play(directionState);
-            this.player.properties.currentDir = directionState;
+            this.player.currentDir = directionState;
         }
 
 
-        if(isMoving != this.player.properties.isMoving){
+        if(isMoving != this.player.isMoving){
             if(!isMoving)
                  this.player.play("standing_" + directionState);
             else
                this.player.play(directionState);
-            this.player.properties.isMoving = isMoving;
+            this.player.isMoving = isMoving;
         }
 
         this.player.velocity = velocity;
