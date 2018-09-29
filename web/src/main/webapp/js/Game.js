@@ -85,23 +85,23 @@ WebGame.Game.prototype = {
     playerHandler: function() {
         if (this.player.alive) {
             this.playerMovementHandler();
-            // Attack towards mouse click
             if (this.game.input.activePointer.isDown) {
                 this.playerAttacks.rate = 1000 - (this.player.speed * 4);
-                    if (this.playerAttacks.rate < 200)
-                        this.playerAttacks.rate = 200;
+                if (this.playerAttacks.rate < 200)
+                    this.playerAttacks.rate = 200;
+                    this.playerAttacks.rate  = 2000;
                 this.playerAttacks.range = this.player.strength * 3;
+                this.player.isAttack = true;
                 this.attack(this.player, this.playerAttacks);
             }
 
             // Use spell when spacebar is pressed
             if (this.game.time.now > this.spellCooldown) {
-            this.spellLabel.text = "READY!";
-
+                this.spellLabel.text = "READY!";
                 if (this.controls.spell.isDown) {
                     this.playerSpells.rate = 5000;
                     this.playerSpells.range = this.player.strength * 6;
-                    this.attack(this.player, this.playerSpells);
+                    this.player.isAttack = true;
                     this.spellCooldown = this.game.time.now + 15000;
                 }
             } else {
@@ -115,22 +115,18 @@ WebGame.Game.prototype = {
             if (this.xp >= this.xpToNext) {
                 this.levelUp();
             }
-        }
-
-        if (!this.player.alive) {
+        }else{
             this.deathHandler(this.player);
             this.game.time.events.add(1000, this.gameOver, this);
         }
     },
 
     enemyHandler: function() {
-
         this.enemies.forEachAlive(function(enemy) {
             if (enemy.visible && enemy.inCamera) {
                 this.game.physics.arcade.moveToObject(enemy, this.player, enemy.speed)
                 this.enemyMovementHandler(enemy);
             }
-
         }, this);
 
         this.enemies.forEachDead(function(enemy) {
@@ -155,7 +151,6 @@ WebGame.Game.prototype = {
             this.dragonSound.play();
             this.notification = 'A ' + boss.name + ' appeared!';
         }
-
         this.bosses.forEachAlive(function(boss) {
             if (boss.visible && boss.inCamera) {
                 this.game.physics.arcade.moveToObject(boss, this.player, boss.speed)
@@ -163,14 +158,12 @@ WebGame.Game.prototype = {
                 this.attack(boss, this.bossAttacks);
             }
         }, this);
-
         this.bosses.forEachDead(function(boss) {;
             this.bossSpawned = false;
-            if (this.bossColorIndex === 7) {
+            if (this.bossColorIndex === 7)
                  this.bossColorIndex = 0;
-            } else {
+            else
                 this.bossColorIndex++;
-            }
 
             this.generateGold(boss);
             this.generateChest(boss);
@@ -179,7 +172,6 @@ WebGame.Game.prototype = {
             this.generateSpeedPotion(boss);
             this.notification = 'The ' + boss.name + ' dropped a potion!';
             this.xp += boss.reward;
-
             // Make the dragon explode
             var emitter = this.game.add.emitter(boss.x, boss.y, 100);
             emitter.makeParticles('flame');
@@ -189,35 +181,28 @@ WebGame.Game.prototype = {
             emitter.start(true, 1000, null, 100);
 
             boss.destroy();
-
         }, this);
     },
 
     collisionHandler: function() {
-
         this.game.physics.arcade.collide(this.player, this.enemies, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bossAttacks, this.hit, null, this);
-
         this.game.physics.arcade.collide(this.bosses, this.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.collide(this.enemies, this.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.overlap(this.bosses, this.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.overlap(this.enemies, this.playerAttacks, this.hit, null, this);
-
         this.game.physics.arcade.collide(this.bosses, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.collide(this.enemies, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.overlap(this.bosses, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.overlap(this.enemies, this.playerSpells, this.hit, null, this);
-
         this.game.physics.arcade.collide(this.obstacles, this.player, null, null, this);
         this.game.physics.arcade.collide(this.obstacles, this.playerAttacks, null, null, this);
         this.game.physics.arcade.collide(this.obstacles, this.enemies, null, null, this);
-
         this.game.physics.arcade.overlap(this.collectables, this.player, this.collect, null, this);
     },
 
     showLabels: function() {
-
         var text = '0';
         style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.notificationLabel = this.game.add.text(25, 25, text, style);
@@ -241,7 +226,6 @@ WebGame.Game.prototype = {
     },
 
     levelUp: function() {
-
         this.player.level++;
         this.player.vitality += 5;
         this.player.health += 5;
@@ -260,14 +244,13 @@ WebGame.Game.prototype = {
     },
 
     attack: function (attacker, attacks) {
-
         if (attacker.alive && this.game.time.now > attacks.next && attacks.countDead() > 0) {
             attacks.next = this.game.time.now + attacks.rate;
             var a = attacks.getFirstDead();
             a.scale.setTo(1.5);
             a.name = attacker.name;
             a.strength = attacker.strength;
-            a.reset(attacker.x + 16, attacker.y + 16);
+            a.reset(attacker.x, attacker.y);
             a.lifespan = attacks.rate;
             console.log(attacker.name + " used " + attacks.name + "!");
             if (attacks.name === 'sword') {
@@ -276,7 +259,7 @@ WebGame.Game.prototype = {
             } else if (attacks.name === 'spell') {
                 a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
                 a.effect = 'spell';
-                a.strength *= 3;
+                a.strength *= 6;
                 this.fireballSound.play();
             } else if (attacks.name === 'fireball') {
                 a.rotation = this.game.physics.arcade.moveToObject(a, this.player, attacks.range);
@@ -286,7 +269,6 @@ WebGame.Game.prototype = {
     },
 
     generateAttacks: function (name, amount, rate, range) {
-
         // Generate the group of attack objects
         var attacks = this.game.add.group();
         attacks.enableBody = true;
@@ -315,16 +297,13 @@ WebGame.Game.prototype = {
     },
 
     hit: function (target, attacker) {
-
         if (this.game.time.now > target.invincibilityTime) {
             target.invincibilityTime = this.game.time.now + target.invincibilityFrames;
             target.damage(attacker.strength)
-            if (target.health < 0) {
+            if (target.health < 0)
                 target.health = 0;
-            }
             this.playSound(target.name);
             this.notification = attacker.name + ' caused ' + attacker.strength + ' damage to ' + target.name + '!';
-
             if (attacker.effect === 'spell') {
                 var emitter = this.game.add.emitter(attacker.x, attacker.y, 100);
                 emitter.makeParticles('spellParticle');
@@ -337,7 +316,6 @@ WebGame.Game.prototype = {
     },
 
     deathHandler: function (target) {
-
         var corpse = this.corpses.create(target.x, target.y, 'dead')
         corpse.scale.setTo(2);
         corpse.animations.add('idle', [target.corpseSprite], 0, true);
@@ -347,7 +325,6 @@ WebGame.Game.prototype = {
     },
 
     collect: function(player, collectable) {
-
         if (!collectable.collected) {
             collectable.collected = true;
             var gain;
@@ -384,81 +361,89 @@ WebGame.Game.prototype = {
                 this.potionSound.play();
                 collectable.destroy();
             }
-
         }
     },
 
     generatePlayer: function () {
         var player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'mage');
-
-        player.animations.add('down',[5,6,7,8,9], 10, true);
-        player.animations.add('left',[5,6,7,8,9], 10, true);
-        player.animations.add('right',[5,6,7,8,9], 10, true);
         player.animations.add('up',[0,1,2,3,4], 10, true);
-        player.animations.play('up');
-        player.scale.setTo(2);
+        player.animations.add('upright',[5,6,7,8,9], 10, true);
+        player.animations.add('right',[10,11,12,13,14], 10, true);
+        player.animations.add('downright',[15,16,17,18,19], 10, true);
+        player.animations.add('down',[20,21,22,23,24], 10, true);
+        player.animations.add('downleft',[25,26,27,28,29], 10, true);
+        player.animations.add('left',[30,31,32,33,34], 10, true);
+        player.animations.add('upleft',[35,36,37,38,39], 10, true);
 
-        // Enable player physics;
+        player.animations.add('upattack',[40,41,42,43], 10, false);
+        player.animations.add('uprightattack',[44,45,46,47], 10, false);
+        player.animations.add('rightattack',[48,49,50,51], 10, false);
+        player.animations.add('downrightattack',[52,53,54,55], 10, false);
+        player.animations.add('downattack',[56,57,58,59], 10, false);
+        player.animations.add('downleftattack',[56,57,58,59], 10, false);
+        player.animations.add('leftattack',[56,57,58,59], 10, false);
+        player.animations.add('upleftattack',[56,57,58,59], 10, false);
+
+        var onComplete = function () {
+             player.isAttack = false;
+             player.play(player.direction);
+        }
+        player.animations._anims.upattack.onComplete.add(onComplete, this);
+        player.animations._anims.uprightattack.onComplete.add(onComplete, this);
+        player.animations._anims.rightattack.onComplete.add(onComplete, this);
+        player.animations._anims.downrightattack.onComplete.add(onComplete, this);
+        player.animations._anims.downattack.onComplete.add(onComplete, this);
+        player.animations._anims.downleftattack.onComplete.add(onComplete, this);
+        player.animations._anims.leftattack.onComplete.add(onComplete, this);
+        player.animations._anims.upleftattack.onComplete.add(onComplete, this);
+
+        player.scale.setTo(2);
         this.game.physics.arcade.enable(player);
+        player.direction = 'up';
         player.body.collideWorldBounds = true
         player.alive = true;
-
         player.name = 'Theodoric';
         player.level = 1;
-
         player.health = 100;
         player.vitality = 100;
-        player.strength = 25;
+        player.strength = 85;
         player.speed = 125;
-
         player.invincibilityFrames = 500;
         player.invincibilityTime = 0;
-
         player.corpseSprite = 1;
 
+        player.animations.play(player.direction);
         return player;
     },
 
     setStats: function (entity, name, health, speed, strength, reward, corpseSprite) {
-
         entity.animations.play('down');
         entity.scale.setTo(2);
-
         entity.body.collideWorldBounds = true;
         entity.body.velocity.x = 0,
         entity.body.velocity.y = 0,
         entity.alive = true;
-
         entity.name = name;
         entity.level = this.player.level;
         entity.health = health + (entity.level * 2);
         entity.speed = speed + Math.floor(entity.level * 1.5);;
         entity.strength = strength + Math.floor(entity.level * 1.5);;
         entity.reward = reward + Math.floor(entity.level * 1.5);
-
         entity.invincibilityFrames = 300;
         entity.invincibilityTime = 0;
-
         entity.corpseSprite = corpseSprite;
-
         return entity;
     },
 
     generateEnemies: function (amount) {
-
         this.enemies = this.game.add.group();
-
-        // Enable physics in them
         this.enemies.enableBody = true;
         this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
-
-        for (var i = 0; i < amount; i++) {
+        for (var i = 0; i < amount; i++)
             this.generateEnemy();
-        }
     },
 
     generateEnemy: function () {
-
         enemy = this.enemies.create(this.game.world.randomX, this.game.world.randomY, 'characters');
 
         do {
@@ -471,66 +456,52 @@ WebGame.Game.prototype = {
         else if (rnd >= .4 && rnd < .6) enemy = this.generateBat(enemy);
         else if (rnd >= .6 && rnd < .7) enemy = this.generateGhost(enemy);
         else if (rnd >= .7 && rnd < 1) enemy = this.generateSpider(enemy);
-
         console.log('Generated ' + enemy.name + ' with ' + enemy.health + ' health, ' + enemy.strength + ' strength, and ' + enemy.speed + ' speed.');
-
         return enemy;
     },
 
     generateSkeleton: function (enemy) {
-
         enemy.animations.add('down', [9, 10, 11], 10, true);
         enemy.animations.add('left', [21, 22, 23], 10, true);
         enemy.animations.add('right', [33, 34, 35], 10, true);
         enemy.animations.add('up', [45, 46, 47], 10, true);
-
         return this.setStats(enemy, 'Skeleton', 100, 70, 20, 5, 6);
     },
 
     generateSlime: function (enemy) {
-
         enemy.animations.add('down', [48, 49, 50], 10, true);
         enemy.animations.add('left', [60, 61, 62], 10, true);
         enemy.animations.add('right', [72, 73, 74], 10, true);
         enemy.animations.add('up', [84, 85, 86], 10, true);
-
         return this.setStats(enemy, 'Slime', 300, 40, 50, 10, 7);
     },
 
     generateBat: function (enemy) {
-
         enemy.animations.add('down', [51, 52, 53], 10, true);
         enemy.animations.add('left', [63, 64, 65], 10, true);
         enemy.animations.add('right', [75, 76, 77], 10, true);
         enemy.animations.add('up', [87, 88, 89], 10, true);
-
         return this.setStats(enemy, 'Bat', 20, 200, 10, 2, 8);
     },
 
     generateGhost: function (enemy) {
-
         enemy.animations.add('down', [54, 55, 56], 10, true);
         enemy.animations.add('left', [66, 67, 68], 10, true);
         enemy.animations.add('right', [78, 79, 80], 10, true);
         enemy.animations.add('up', [90, 91, 92], 10, true);
-
         return this.setStats(enemy, 'Ghost', 200, 60, 30, 7, 9);
     },
 
     generateSpider: function (enemy) {
-
         enemy.animations.add('down', [57, 58, 59], 10, true);
         enemy.animations.add('left', [69, 70, 71], 10, true);
         enemy.animations.add('right', [81, 82, 83], 10, true);
         enemy.animations.add('up', [93, 94, 95], 10, true);
-
         return this.setStats(enemy, 'Spider', 50, 120, 12, 4, 10);
     },
 
     generateDragon: function (colorIndex) {
-
         var boss = this.bosses.create(this.player.x, this.player.y - 300, 'dragons');
-
         if (colorIndex === 0) {
             boss.animations.add('down', [0, 1, 2], 10, true);
             boss.animations.add('left', [12, 13, 14], 10, true);
@@ -572,17 +543,13 @@ WebGame.Game.prototype = {
             boss.animations.add('right', [72, 73, 74], 10, true);
             boss.animations.add('up', [84, 85, 86], 10, true);
         }
-
         console.log('Generated dragon!');
-
         return this.setStats(boss, 'Dragon', 2000, 100, 50, 500, 0);
     },
 
     generateObstacles: function() {
-
         this.obstacles = this.game.add.group();
         this.obstacles.enableBody = true;
-
         var amount = 300;
         for (var i = 0; i < amount; i++) {
             var point = this.getRandomLocation();
@@ -592,9 +559,7 @@ WebGame.Game.prototype = {
     },
 
     generateObstacle: function (location, spriteIndex) {
-
         obstacle = this.obstacles.create(location.x, location.y, 'tiles');
-
         if (spriteIndex === 0) {
             obstacle.animations.add('tree', [38], 0, true);
             obstacle.animations.play('tree');
@@ -634,11 +599,9 @@ WebGame.Game.prototype = {
     },
 
     generateCollectables: function () {
-
         this.collectables = this.game.add.group();
         this.collectables.enableBody = true;
         this.collectables.physicsBodyType = Phaser.Physics.ARCADE;
-
         var amount = 100;
         for (var i = 0; i < amount; i++) {
             var point = this.getRandomLocation();
@@ -647,7 +610,6 @@ WebGame.Game.prototype = {
     },
 
     generateChest: function (location) {
-
         var collectable = this.collectables.create(location.x, location.y, 'things');
         collectable.scale.setTo(2);
         collectable.animations.add('idle', [6], 0, true);
@@ -655,12 +617,10 @@ WebGame.Game.prototype = {
         collectable.animations.play('idle');
         collectable.name = 'chest'
         collectable.value = Math.floor(Math.random() * 150);
-
         return collectable;
     },
 
     generateGold: function (enemy) {
-
         var collectable = this.collectables.create(enemy.x, enemy.y, 'tiles');
         collectable.animations.add('idle', [68], 0, true);
         collectable.animations.play('idle');
@@ -670,21 +630,18 @@ WebGame.Game.prototype = {
     },
 
     generatePotion: function (location) {
-
         var rnd = Math.random();
-        if (rnd >= 0 && rnd < .7) {
+        if (rnd >= 0 && rnd < .7)
             this.generateHealthPotion(location);
-        } else if (rnd >= .7 && rnd < .8) {
+        else if (rnd >= .7 && rnd < .8)
             this.generateVitalityPotion(location);
-        } else if (rnd >= .8 && rnd < .9) {
+        else if (rnd >= .8 && rnd < .9)
             this.generateStrengthPotion(location);
-        } else if (rnd >= .9 && rnd < 1) {
+        else if (rnd >= .9 && rnd < 1)
             this.generateSpeedPotion(location);
-        }
     },
 
     generateHealthPotion: function (location) {
-
         var collectable = this.collectables.create(location.x, location.y, 'potions');
         collectable.animations.add('idle', [0], 0, true);
         collectable.animations.play('idle');
@@ -694,7 +651,6 @@ WebGame.Game.prototype = {
     },
 
     generateVitalityPotion: function (location) {
-
         var collectable = this.collectables.create(location.x, location.y, 'potions');
         collectable.animations.add('idle', [2], 0, true);
         collectable.animations.play('idle');
@@ -704,7 +660,6 @@ WebGame.Game.prototype = {
     },
 
     generateStrengthPotion: function (location) {
-
         var collectable = this.collectables.create(location.x, location.y, 'potions');
         collectable.animations.add('idle', [3], 0, true);
         collectable.animations.play('idle');
@@ -714,7 +669,6 @@ WebGame.Game.prototype = {
     },
 
     generateSpeedPotion: function (location) {
-
         var collectable = this.collectables.create(location.x, location.y, 'potions');
         collectable.animations.add('idle', [4], 0, true);
         collectable.animations.play('idle');
@@ -724,32 +678,23 @@ WebGame.Game.prototype = {
     },
 
     playSound: function (name) {
-
-        if (name === this.player.name) {
+        if (name === this.player.name)
             this.playerSound.play();
-
-        } else if (name === 'Skeleton') {
+        else if (name === 'Skeleton')
             this.skeletonSound.play();
-
-        } else if (name === 'Slime') {
+        else if (name === 'Slime')
             this.slimeSound.play();
-
-        } else if (name === 'Bat') {
+        else if (name === 'Bat')
             this.batSound.play();
-
-        } else if (name === 'Ghost') {
+        else if (name === 'Ghost')
             this.ghostSound.play();
-
-        } else if (name === 'Spider') {
+        else if (name === 'Spider')
             this.spiderSound.play();
-
-        } else if (name === 'Dragon') {
+        else if (name === 'Dragon')
              this.dragonSound.play();
-         }
     },
 
     generateSounds: function () {
-
         this.attackSound = this.game.add.audio('attackSound');
         this.batSound = this.game.add.audio('batSound');
         this.fireballSound = this.game.add.audio('fireballSound');
@@ -765,77 +710,105 @@ WebGame.Game.prototype = {
     },
 
     playerMovementHandler: function () {
+        var vel = {x:0, y:0};
 
         // Up-Left
         if (this.controls.up.isDown && this.controls.left.isDown) {
-            this.player.body.velocity.x = -this.player.speed;
-            this.player.body.velocity.y = -this.player.speed;
-            this.player.animations.play('left');
-
+            vel.x = -this.player.speed;
+            vel.y = -this.player.speed;
+            this.player.direction = 'upleft';
+            if(!this.player.isAttack)
+                this.player.animations.play(this.player.direction);
+            else
+                this.player.animations.play(this.player.direction + "attack");
         // Up-Right
         } else if (this.controls.up.isDown && this.controls.right.isDown) {
-            this.player.body.velocity.x = this.player.speed;
-            this.player.body.velocity.y = -this.player.speed;
-            this.player.animations.play('right');
-
+            vel.x = this.player.speed;
+            vel.y = -this.player.speed;
+            this.player.direction = 'upright';
+            if(!this.player.isAttack)
+                this.player.animations.play(this.player.direction);
+            else
+                this.player.animations.play(this.player.direction + "attack");
         // Down-Left
         } else if (this.controls.down.isDown && this.controls.left.isDown) {
-            this.player.body.velocity.x = -this.player.speed;
-            this.player.body.velocity.y = this.player.speed;
-            this.player.animations.play('left');
-
+            vel.x = -this.player.speed;
+            vel.y = this.player.speed;
+            this.player.direction = 'downleft';
+            if(!this.player.isAttack)
+                this.player.animations.play(this.player.direction);
+            else
+                this.player.animations.play(this.player.direction + "attack");
         // Down-Right
         } else if (this.controls.down.isDown && this.controls.right.isDown) {
-            this.player.body.velocity.x = this.player.speed;
-            this.player.body.velocity.y = this.player.speed;
-            this.player.animations.play('right');
-
+            vel.x = this.player.speed;
+            vel.y = this.player.speed;
+            this.player.direction = 'downright';
+            if(!this.player.isAttack)
+               this.player.animations.play(this.player.direction);
+            else
+               this.player.animations.play(this.player.direction + "attack");
         // Up
         } else if (this.controls.up.isDown) {
-            this.player.body.velocity.x = 0;
-            this.player.body.velocity.y = -this.player.speed;
-            this.player.animations.play('up');
-
+            vel.x = 0;
+            vel.y = -this.player.speed;
+            this.player.direction = 'up';
+            if(!this.player.isAttack)
+                 this.player.animations.play(this.player.direction);
+             else
+                 this.player.animations.play(this.player.direction + "attack");
         // Down
         } else if (this.controls.down.isDown) {
-            this.player.body.velocity.x = 0;
-            this.player.body.velocity.y = this.player.speed;
-            this.player.animations.play('down');
-
+            vel.x = 0;
+            vel.y = this.player.speed;
+            this.player.direction = 'down';
+            if(!this.player.isAttack)
+               this.player.animations.play(this.player.direction);
+            else
+               this.player.animations.play(this.player.direction + "attack");
         // Left
         } else if (this.controls.left.isDown) {
-            this.player.body.velocity.x = -this.player.speed;
-            this.player.body.velocity.y = 0;
-            this.player.animations.play('left');
-
+            vel.x = -this.player.speed;
+            vel.y = 0;
+            this.player.direction = 'left';
+             if(!this.player.isAttack)
+                this.player.animations.play(this.player.direction);
+             else
+                this.player.animations.play(this.player.direction + "attack");
         // Right
         } else if (this.controls.right.isDown) {
-            this.player.body.velocity.x = this.player.speed;
-            this.player.body.velocity.y = 0;
-            this.player.animations.play('right');
-
+            vel.x = this.player.speed;
+            vel.y = 0;
+            this.player.direction = 'right';
+             if(!this.player.isAttack)
+                this.player.animations.play(this.player.direction);
+             else
+                this.player.animations.play(this.player.direction + "attack");
         // Still
         } else {
-            this.player.animations.stop();
-            this.player.body.velocity.x = 0;
-            this.player.body.velocity.y = 0;
+
+            if(this.player.isAttack)
+                this.player.animations.play(this.player.direction + "attack");
+            else
+                this.player.animations.stop();
+            vel.x = 0;
+            vel.y = 0;
         }
+
+        this.player.body.velocity.x = vel.x;
+        this.player.body.velocity.y = vel.y;
     },
 
     enemyMovementHandler: function (enemy) {
-
         // Left
         if (enemy.body.velocity.x < 0 && enemy.body.velocity.x <= -Math.abs(enemy.body.velocity.y)) {
              enemy.animations.play('left');
-
         // Right
         } else if (enemy.body.velocity.x > 0 && enemy.body.velocity.x >= Math.abs(enemy.body.velocity.y)) {
              enemy.animations.play('right');
-
         // Up
         } else if (enemy.body.velocity.y < 0 && enemy.body.velocity.y <= -Math.abs(enemy.body.velocity.x)) {
             enemy.animations.play('up');
-
         // Down
         } else {
             enemy.animations.play('down');
@@ -843,17 +816,14 @@ WebGame.Game.prototype = {
     },
 
     gameOver: function() {
-
         this.background.destroy();
         this.corpses.destroy();
         this.collectables.destroy();
         this.player.destroy();
         this.playerAttacks.destroy();
         this.enemies.destroy();
-
 		this.music.stop();
 		this.music.destroy();
-
         this.attackSound.destroy();
         this.playerSound.destroy();
         this.skeletonSound.destroy();
@@ -862,21 +832,11 @@ WebGame.Game.prototype = {
         this.ghostSound.destroy();
         this.spiderSound.destroy();
         this.goldSound.destroy();
-
-        //  Here you should destroy anything you no longer need.
-        //  Stop music, delete sprites, purge caches, free resources, all that good stuff.
-
-        //  Then let's go back to the main menu.
         this.game.state.start('MainMenu', true, false, this.xp + this.gold);
     },
 
     quitGame: function (pointer) {
-
-        //  Here you should destroy anything you no longer need.
-        //  Stop music, delete sprites, purge caches, free resources, all that good stuff.
 		this.music.stop();
-
-        //  Then let's go back to the main menu.
         this.game.state.start('MainMenu', true, false, this.xp + this.gold);
     },
 
@@ -891,7 +851,6 @@ WebGame.Game.prototype = {
     },
 
     generateGrid: function (worldSize) {
-
         this.grid = [];
         var gridSize = 32;
         var grids = Math.floor(worldSize / gridSize);
@@ -906,7 +865,6 @@ WebGame.Game.prototype = {
     },
 
     getRandomLocation: function () {
-
         var gridIndex = 0;
         var x = this.grid[gridIndex].x;
         var y = this.grid[gridIndex].y;
@@ -921,20 +879,14 @@ WebGame.Game.prototype = {
 
     shuffle: function (array) {
        var currentIndex = array.length, temporaryValue, randomIndex ;
-
        // While there remain elements to shuffle...
        while (0 !== currentIndex) {
-
-            // Pick a remaining element...
             randomIndex = Math.floor(Math.random() * currentIndex);
             currentIndex -= 1;
-
-            // And swap it with the current element.
             temporaryValue = array[currentIndex];
             array[currentIndex] = array[randomIndex];
             array[randomIndex] = temporaryValue;
        }
-
        return array;
     }
 };
