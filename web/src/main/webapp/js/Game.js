@@ -86,16 +86,11 @@ WebGame.Game.prototype = {
         if (this.player.alive) {
             this.playerMovementHandler();
             if (this.game.input.activePointer.isDown) {
-                this.playerAttacks.rate = 1000 - (this.player.speed * 4);
-                if (this.playerAttacks.rate < 200)
-                    this.playerAttacks.rate = 200;
-                    this.playerAttacks.rate  = 2000;
+                this.playerAttacks.rate = 1000;
                 this.playerAttacks.range = this.player.strength * 3;
                 this.player.isAttack = true;
                 this.attack(this.player, this.playerAttacks);
             }
-
-            // Use spell when spacebar is pressed
             if (this.game.time.now > this.spellCooldown) {
                 this.spellLabel.text = "READY!";
                 if (this.controls.spell.isDown) {
@@ -111,7 +106,6 @@ WebGame.Game.prototype = {
             if (this.player.health > this.player.vitality) {
                 this.player.health = this.player.vitality;
             }
-
             if (this.xp >= this.xpToNext) {
                 this.levelUp();
             }
@@ -244,17 +238,18 @@ WebGame.Game.prototype = {
     },
 
     attack: function (attacker, attacks) {
-        if (attacker.alive && this.game.time.now > attacks.next && attacks.countDead() > 0) {
+        if (attacker.alive && this.game.time.now > attacks.next) {
             attacks.next = this.game.time.now + attacks.rate;
-            var a = attacks.getFirstDead();
+            var a = attacks.create(0,0, attacks.name);
             a.scale.setTo(1.5);
             a.name = attacker.name;
             a.strength = attacker.strength;
             a.reset(attacker.x, attacker.y);
-            a.lifespan = attacks.rate;
+            a.lifespan = 10*attacks.rate;
             console.log(attacker.name + " used " + attacks.name + "!");
             if (attacks.name === 'sword') {
-                a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
+                a.reset(this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
+                //a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
                 this.attackSound.play();
             } else if (attacks.name === 'spell') {
                 a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
@@ -273,7 +268,7 @@ WebGame.Game.prototype = {
         var attacks = this.game.add.group();
         attacks.enableBody = true;
         attacks.physicsBodyType = Phaser.Physics.ARCADE;
-        attacks.createMultiple(amount, name);
+        //attacks.createMultiple(amount, name);
 
         if (name === 'spell') {
             attacks.callAll('animations.add', 'animations', 'particle', [0, 1, 2, 3,4 ,5], 10, true);
@@ -302,6 +297,7 @@ WebGame.Game.prototype = {
             target.damage(attacker.strength)
             if (target.health < 0)
                 target.health = 0;
+            //attacker.active = false;
             this.playSound(target.name);
             this.notification = attacker.name + ' caused ' + attacker.strength + ' damage to ' + target.name + '!';
             if (attacker.effect === 'spell') {
@@ -388,6 +384,7 @@ WebGame.Game.prototype = {
              player.isAttack = false;
              player.play(player.direction);
         }
+
         player.animations._anims.upattack.onComplete.add(onComplete, this);
         player.animations._anims.uprightattack.onComplete.add(onComplete, this);
         player.animations._anims.rightattack.onComplete.add(onComplete, this);
