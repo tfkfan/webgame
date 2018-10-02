@@ -1,0 +1,30 @@
+{"frames": [
+{
+	"filename": "blizzard00",
+	"frame": {"x":35,"y":245,"w":30,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":30},
+	"sourceSize": {"w":30,"h":30}
+}
+,
+{
+	"filename": "blizzard01",
+	"frame": {"x":65,"y":245,"w":30,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":30},
+	"sourceSize": {"w":30,"h":30}
+}
+,
+{
+	"filename": "blizzard02",
+	"frame": {"x":95,"y":245,"w":30,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":30},
+	"sourceSize": {"w":30,"h":30}
+}
+],
+"meta": {"image": "mage.png","size": {"w": 370, "h": 657},"scale": "1"}
+}

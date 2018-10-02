@@ -19,15 +19,18 @@ WebGame.Preloader.prototype = {
 		this.load.image('levelParticle', 'assets/images/level-particle.png');
 		this.load.image('spellParticle', 'assets/images/spell-particle.png');
 
+		this.load.atlas('mage', 'assets/playersheets/mage.png', 'assets/playersheets/mage_atlas.json');
+		this.load.atlas('skills', 'assets/skillsheets/skills.png', 'assets/skillsheets/skills.json');
+
 		this.load.spritesheet('tiles', 'assets/images/tiles.png', 16, 16);
 		this.load.spritesheet('things', 'assets/images/things.png', 16, 16);
-		this.load.atlas('mage', 'assets/playersheets/mage.png', 'assets/playersheets/mage_atlas.json');
 		this.load.spritesheet('characters', 'assets/images/characters.png', 16, 16);
 		this.load.spritesheet('dead', 'assets/images/dead.png', 16, 16);
 		this.load.spritesheet('potions', 'assets/images/potions.png', 16, 16);
 		this.load.spritesheet('dragons', 'assets/images/dragons.png', 32, 32);
 		this.load.spritesheet('fireball', 'assets/images/fireball.png', 16, 16);
 		this.load.spritesheet('spell', 'assets/images/spell.png', 12, 12);
+		this.load.spritesheet('staticSpell', 'assets/skillsheets/cast_001.png', 190, 192);
 
 		this.load.audio('openingMusic', 'assets/sound/opening.ogg');
 		this.load.audio('overworldMusic', 'assets/sound/overworld.ogg');

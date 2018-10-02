@@ -40,10 +40,11 @@ WebGame.Game.prototype = {
         // Generate player and set camera to follow
         this.player = this.generatePlayer();
         this.game.camera.follow(this.player);
-        this.playerAttacks = this.generateAttacks('sword', 1);
-        this.playerSpells = this.generateAttacks('spell', 1);
-        this.bossAttacks = this.generateAttacks('spellParticle', 5,2000, 300);
-        this.bossAttacks = this.generateAttacks('fireball', 1, 2000, 300);
+        this.playerAttacks = this.generateAttacks('staticSpell', 'skills');
+        this.playerSpells = this.generateAttacks('spell');
+        //this.playerSpells2 = this.generateAttacks('spell2');
+        this.bossAttacks = this.generateAttacks('spellParticle',null, 2000, 300);
+        this.bossAttacks = this.generateAttacks('fireball', null,2000, 300);
         // Generate enemies - must be generated after player and player.level
         this.generateEnemies(2);
         // Generate bosses
@@ -98,6 +99,7 @@ WebGame.Game.prototype = {
                     this.playerSpells.range = this.player.strength * 6;
                     this.player.isAttack = true;
                     this.spellCooldown = this.game.time.now + 15000;
+                    this.attack(this.player, this.playerSpells);
                 }
             } else {
                 this.spellLabel.text = "RECHARGING...";
@@ -240,19 +242,24 @@ WebGame.Game.prototype = {
     attack: function (attacker, attacks) {
         if (attacker.alive && this.game.time.now > attacks.next) {
             attacks.next = this.game.time.now + attacks.rate;
-            var a = attacks.create(0,0, attacks.name);
+            var a = attacks.getFirstDead();
+
             a.scale.setTo(1.5);
             a.name = attacker.name;
             a.strength = attacker.strength;
             a.reset(attacker.x, attacker.y);
-            a.lifespan = 10*attacks.rate;
+           // a.lifespan = 10*attacks.rate;
             console.log(attacker.name + " used " + attacks.name + "!");
-            if (attacks.name === 'sword') {
-                a.reset(this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
+            if (attacks.name === 'staticSpell') {
+                var p = this.game.input.activePointer;
+                a.reset(p.worldX - 100, p.worldY - 250);
+                a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
+                //a.reset(this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
                 //a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
+                a.animations.play("staticSpell");
                 this.attackSound.play();
             } else if (attacks.name === 'spell') {
-                a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
+               // a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
                 a.effect = 'spell';
                 a.strength *= 6;
                 this.fireballSound.play();
@@ -263,19 +270,31 @@ WebGame.Game.prototype = {
         }
     },
 
-    generateAttacks: function (name, amount, rate, range) {
-        // Generate the group of attack objects
+    generateAttacks: function (name, spritesheetname, rate, range) {
         var attacks = this.game.add.group();
         attacks.enableBody = true;
         attacks.physicsBodyType = Phaser.Physics.ARCADE;
-        //attacks.createMultiple(amount, name);
+        if(spritesheetname === undefined || spritesheetname === null)
+            spritesheetname = name;
+        attacks.createMultiple(50, spritesheetname);
+
+        var killOnComplete = function(event) {event.kill()}
 
         if (name === 'spell') {
-            attacks.callAll('animations.add', 'animations', 'particle', [0, 1, 2, 3,4 ,5], 10, true);
-            attacks.callAll('animations.play', 'animations', 'particle');
+            attacks.callAll('animations.add', 'animations', 'spell', [0, 1, 2, 3, 4, 5], 10, false);
+            attacks.callAll('animations.play', 'animations', 'spell');
         } else if (name === 'fireball') {
             attacks.callAll('animations.add', 'animations', 'particle', [0, 1, 2, 3], 10, true);
-            attacks.callAll('animations.play', 'animations', 'particle');
+            //attacks.callAll('animations.play', 'animations', 'particle');
+        } else if(name === 'staticSpell'){
+            attacks.callAll('animations.add', 'animations', 'skills',
+                        [0, 1, 2], 10, false);
+            attacks.callAll('events.onAnimationComplete.add','events.onAnimationComplete', function(event){
+                event.animations.play("skills");
+            });
+          /*  attacks.callAll('animations.add', 'animations', 'staticSpell',
+                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12, 13, 14, 15, 16, 17, 18, 19], 10, false, true);
+            attacks.callAll('events.onAnimationComplete.add','events.onAnimationComplete', killOnComplete);*/
         }
 
         attacks.setAll('anchor.x', 0.5);
