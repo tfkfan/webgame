@@ -24,6 +24,14 @@
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":30},
 	"sourceSize": {"w":30,"h":30}
+},
+{
+	"filename": "blizzard03",
+	"frame": {"x":125,"y":245,"w":30,"h":30},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":30,"h":30},
+	"sourceSize": {"w":30,"h":30}
 }
 ],
 "meta": {"image": "mage.png","size": {"w": 370, "h": 657},"scale": "1"}
