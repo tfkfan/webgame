@@ -41,6 +41,7 @@ WebGame.Game.prototype = {
         this.player = this.generatePlayer();
         this.game.camera.follow(this.player);
         this.playerAttacks = this.generateAttacks('staticSpell', 'skills');
+        this.playerAttacks2 = this.generateAttacks('staticSpell2', 'skills');
         this.playerSpells = this.generateAttacks('spell');
         //this.playerSpells2 = this.generateAttacks('spell2');
         this.bossAttacks = this.generateAttacks('spellParticle',null, 2000, 300);
@@ -242,10 +243,6 @@ WebGame.Game.prototype = {
         emitter.start(true, 1000, null, 100);
     },
 
-    getRandomNum: function(min, max) {
-        return Math.random() * (max - min) + min;
-    },
-
     attack: function (attacker, attacks) {
         if (attacker.alive && this.game.time.now > attacks.next) {
             attacks.next = this.game.time.now + 30;
@@ -257,39 +254,9 @@ WebGame.Game.prototype = {
             a.reset(attacker.x, attacker.y);
            // a.lifespan = 10*attacks.rate;
             console.log(attacker.name + " used " + attacks.name + "!");
-            if (attacks.name === 'staticSpell') {
-                var p = this.game.input.activePointer;
 
-                var rx1 = p.worldX - 100;
-                var ry1 = p.worldY - 50;
-                var rx2 = p.worldX + 100;
-                var ry2 = p.worldY + 50;
-
-                var randX = this.getRandomNum(rx1, rx2);
-                var randY = this.getRandomNum(ry1, ry2);
-
-                a.reset(randX - 150, randY - 250);
-
-                var tween = this.game.add.tween(a).to( { x: randX, y: randY}, 1000);
-                tween.onComplete.add(function(){
-                    a.animations.play("skills");
-                    a.events.onAnimationComplete.add(function(event){
-                        event.kill();
-                        a.animations.stop(null, true);
-                    }, this);
-                }, this);
-                tween.start();
-
-                this.lastAttack = this.game.time.now;
-
-
-                // a.reset(p.worldX - 100, p.worldY - 250);
-                // a.rotation = this.game.physics.arcade.moveToXY(a, attacks.range);
-                //a.reset(this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
-                //a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
-                a.animations.play("staticSpell");
-               // this.attackSound.play();
-            } else if (attacks.name === 'spell') {
+            attacks.run(a);
+            /* else if (attacks.name === 'spell') {
                // a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
                 a.effect = 'spell';
                 a.strength *= 6;
@@ -297,29 +264,22 @@ WebGame.Game.prototype = {
             } else if (attacks.name === 'fireball') {
                 a.rotation = this.game.physics.arcade.moveToObject(a, this.player, attacks.range);
                 this.fireballSound.play();
-            }
+            }*/
         }
     },
 
     generateAttacks: function (name, spritesheetname, rate, range) {
-        var attacks = this.game.add.group();
-        attacks.enableBody = true;
-        attacks.physicsBodyType = Phaser.Physics.ARCADE;
-        if(spritesheetname === undefined || spritesheetname === null)
-            spritesheetname = name;
-        attacks.createMultiple(50, spritesheetname);
-
         var killOnComplete = function(event) {event.kill()}
 
-        if (name === 'spell') {
+        /*if (name === 'spell') {
             attacks.callAll('animations.add', 'animations', 'spell', [0, 1, 2, 3, 4, 5], 10, false);
             attacks.callAll('animations.play', 'animations', 'spell');
         } else if (name === 'fireball') {
             attacks.callAll('animations.add', 'animations', 'particle', [0, 1, 2, 3], 10, true);
             //attacks.callAll('animations.play', 'animations', 'particle');
-        } else if(name === 'staticSpell'){
-            attacks.callAll('animations.add', 'animations', 'skills',
-                        [0, 1, 2, 3], 10, false);
+        } else*/
+        if(name === 'staticSpell'){
+            attacks = new Blizzard(this.game, name, spritesheetname, rate, range);
            /* attacks.callAll('events.onAnimationComplete.add','events.onAnimationComplete', function(event){
                 event.animations.play("skills");
             });*/
@@ -328,18 +288,9 @@ WebGame.Game.prototype = {
             attacks.callAll('events.onAnimationComplete.add','events.onAnimationComplete', killOnComplete);*/
         }
 
-        attacks.setAll('anchor.x', 0.5);
-        attacks.setAll('anchor.y', 0.5);
-        attacks.setAll('outOfBoundsKill', true);
-        attacks.setAll('checkWorldBounds', true);
-
-        attacks.rate = rate;
-        attacks.range = range;
-        attacks.next = 0;
-        attacks.name = name;
-
         return attacks;
     },
+
 
     hit: function (target, attacker) {
         if (this.game.time.now > target.invincibilityTime) {
