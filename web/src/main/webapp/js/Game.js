@@ -21,6 +21,13 @@ WebGame.Game.prototype = {
     create: function () {
         var worldSize = 1920;
         this.game.world.setBounds(0, 0, worldSize, worldSize);
+        //this.background = this.game.add.tilemap('worldmap');
+       // this.background.addTilesetImage('tileset', 'tiles');
+
+        //this.layer = this.background.createLayer('tiles layer');
+
+            //  This resizes the game world to match the layer dimensions
+        //this.layer.resizeWorld();
         this.background = this.game.add.tileSprite(0, 0, this.game.world.width / 2, this.game.world.height / 2, 'tiles', 65);
         this.background.scale.setTo(2);
         this.generateGrid(worldSize);
@@ -30,7 +37,7 @@ WebGame.Game.prototype = {
         this.gold = 0;
         this.xp = 0;
         this.xpToNext = 20;
-        this.goldForBoss = 5000;
+        this.goldForBoss = 1000;
         this.bossSpawned = false;
         this.bossColorIndex = 0;
 
@@ -40,12 +47,12 @@ WebGame.Game.prototype = {
         // Generate player and set camera to follow
         this.player = this.generatePlayer();
         this.game.camera.follow(this.player);
-        this.playerAttacks = this.generateAttacks('staticSpell', 'skills');
-        this.playerAttacks2 = this.generateAttacks('staticSpell2', 'skills');
-        this.playerSpells = this.generateAttacks('spell');
+        this.playerAttacks = new Blizzard(this.game, 'blizzard', 'skills', 1000);
+        //this.generateAttacks('staticSpell', 'skills');
+        //this.playerSpells = this.generateAttacks('spell');
         //this.playerSpells2 = this.generateAttacks('spell2');
-        this.bossAttacks = this.generateAttacks('spellParticle',null, 2000, 300);
-        this.bossAttacks = this.generateAttacks('fireball', null,2000, 300);
+        this.bossAttacks = this.game.add.group();
+
         // Generate enemies - must be generated after player and player.level
         this.generateEnemies(2);
         // Generate bosses
@@ -93,9 +100,7 @@ WebGame.Game.prototype = {
                 this.player.isAttack = true;
                 this.attack(this.player, this.playerAttacks);
             }
-            if(this.lastAttack !== undefined){
-                this.attack(this.player, this.playerAttacks);
-            }
+
             if (this.game.time.now > this.spellCooldown) {
                 this.spellLabel.text = "READY!";
                 if (this.controls.spell.isDown) {
@@ -146,7 +151,7 @@ WebGame.Game.prototype = {
         // Spawn boss if player obtains enough gold
         if (this.gold > this.goldForBoss && !this.bossSpawned) {
             this.bossSpawned = true;
-            this.goldForBoss += 5000;
+            this.goldForBoss += 1000;
             var boss = this.generateDragon(this.bossColorIndex);
             this.dragonSound.play();
             this.notification = 'A ' + boss.name + ' appeared!';
@@ -250,7 +255,7 @@ WebGame.Game.prototype = {
 
            // a.scale.setTo(1.5);
             a.name = attacker.name;
-            a.strength = attacker.strength;
+            a.strength = attacks.damage;
             a.reset(attacker.x, attacker.y);
            // a.lifespan = 10*attacks.rate;
             console.log(attacker.name + " used " + attacks.name + "!");
@@ -268,31 +273,10 @@ WebGame.Game.prototype = {
         }
     },
 
-    generateAttacks: function (name, spritesheetname, rate, range) {
-        var killOnComplete = function(event) {event.kill()}
-
-        /*if (name === 'spell') {
-            attacks.callAll('animations.add', 'animations', 'spell', [0, 1, 2, 3, 4, 5], 10, false);
-            attacks.callAll('animations.play', 'animations', 'spell');
-        } else if (name === 'fireball') {
-            attacks.callAll('animations.add', 'animations', 'particle', [0, 1, 2, 3], 10, true);
-            //attacks.callAll('animations.play', 'animations', 'particle');
-        } else*/
-        if(name === 'staticSpell'){
-            attacks = new Blizzard(this.game, name, spritesheetname, rate, range);
-           /* attacks.callAll('events.onAnimationComplete.add','events.onAnimationComplete', function(event){
-                event.animations.play("skills");
-            });*/
-          /*  attacks.callAll('animations.add', 'animations', 'staticSpell',
-                [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11,12, 13, 14, 15, 16, 17, 18, 19], 10, false, true);
-            attacks.callAll('events.onAnimationComplete.add','events.onAnimationComplete', killOnComplete);*/
-        }
-
-        return attacks;
-    },
-
-
     hit: function (target, attacker) {
+        if(target === this.player && attacker.parent === this.playerAttacks){
+            return;
+        }
         if (this.game.time.now > target.invincibilityTime) {
             target.invincibilityTime = this.game.time.now + target.invincibilityFrames;
             target.damage(attacker.strength)

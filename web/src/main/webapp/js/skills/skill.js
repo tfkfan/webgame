@@ -1,4 +1,4 @@
-Skill = function (game, name, image, rate, range) {
+Skill = function (game, name, image, damage) {
     Phaser.Group.call(this, game);
 
     this.name = name;
@@ -12,8 +12,7 @@ Skill = function (game, name, image, rate, range) {
     this.setAll('outOfBoundsKill', true);
     this.setAll('checkWorldBounds', true);
 
-    this.rate = rate;
-    this.range = range;
+    this.damage = damage;
     this.next = 0;
     this.name = name;
 

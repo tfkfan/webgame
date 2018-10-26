@@ -1,6 +1,6 @@
 Blizzard = function (game, name, image, rate, range) {
     Skill.call(this, game, name, image, rate, range);
-    this.callAll('animations.add', 'animations', 'skills',
+    this.callAll('animations.add', 'animations', 'blizzard',
                             [0, 1, 2, 3], 10, false);
 };
 
@@ -17,25 +17,23 @@ Blizzard.prototype.run = function(a){
       var randX = getRandomNum(rx1, rx2);
       var randY = getRandomNum(ry1, ry2);
 
+      if(a.body.isFalling === undefined || a.body.isFalling)
+        a.body.enable = false;
+
       a.reset(randX - 150, randY - 250);
 
-      var tween = this.game.add.tween(a).to( { x: randX, y: randY}, 1000);
+      var tween = this.game.add.tween(a).to( { x: randX, y: randY}, 500);
       tween.onComplete.add(function(){
-          a.animations.play("skills");
+          a.animations.play("blizzard");
+          a.body.isFalling = false;
+          a.body.enable = true;
           a.events.onAnimationComplete.add(function(event){
               event.kill();
               a.animations.stop(null, true);
+              a.body.isFalling = true;
           }, this);
       }, this);
       tween.start();
 
-      this.lastAttack = this.game.time.now;
-
-
-      // a.reset(p.worldX - 100, p.worldY - 250);
-      // a.rotation = this.game.physics.arcade.moveToXY(a, attacks.range);
-      //a.reset(this.game.input.activePointer.worldX, this.game.input.activePointer.worldY);
-      //a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
-      a.animations.play("staticSpell");
-
+     // a.animations.play("blizzard0");
 };
