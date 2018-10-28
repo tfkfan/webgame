@@ -21,15 +21,15 @@ WebGame.Game.prototype = {
     create: function () {
         var worldSize = 1920;
         this.game.world.setBounds(0, 0, worldSize, worldSize);
-        //this.background = this.game.add.tilemap('worldmap');
-       // this.background.addTilesetImage('tileset', 'tiles');
+        this.background = this.game.add.tilemap('worldmap');
+        this.background.addTilesetImage('tiles', 'tiles');
 
-        //this.layer = this.background.createLayer('tiles layer');
-
+        this.mainlayer = this.background.createLayer('tiles layer');
+        //this.obstacleslayer = this.background.createLayer('ground');
             //  This resizes the game world to match the layer dimensions
-        //this.layer.resizeWorld();
-        this.background = this.game.add.tileSprite(0, 0, this.game.world.width / 2, this.game.world.height / 2, 'tiles', 65);
-        this.background.scale.setTo(2);
+        this.mainlayer.resizeWorld();
+        //this.obstacleslayer.resizeWorld();
+
         this.generateGrid(worldSize);
 
         this.notification = '';
@@ -603,7 +603,7 @@ WebGame.Game.prototype = {
     },
 
     generateGold: function (enemy) {
-        var collectable = this.collectables.create(enemy.x, enemy.y, 'tiles');
+        var collectable = this.collectables.create(enemy.x, enemy.y, 'sprites');
         collectable.animations.add('idle', [68], 0, true);
         collectable.animations.play('idle');
         collectable.name = 'gold';

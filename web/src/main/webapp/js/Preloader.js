@@ -22,10 +22,10 @@ WebGame.Preloader.prototype = {
 		this.load.atlas('mage', 'assets/playersheets/mage.png', 'assets/playersheets/mage_atlas.json');
 		this.load.atlas('skills', 'assets/skillsheets/skills.png', 'assets/skillsheets/skills.json');
 
-        //this.load.tilemap('worldmap', 'assets/maps/map.json', null, Phaser.Tilemap.TILED_JSON);
-        //this.load.image('tiles', 'assets/maps/tiles.png');
+        this.load.tilemap('worldmap', 'assets/maps/map.json', null, Phaser.Tilemap.TILED_JSON);
+        this.load.image('tiles', 'assets/maps/tiles.png');
 
-		this.load.spritesheet('tiles', 'assets/images/tiles.png', 16, 16);
+		this.load.spritesheet('sprites', 'assets/images/tiles.png', 16, 16);
 		this.load.spritesheet('things', 'assets/images/things.png', 16, 16);
 		this.load.spritesheet('characters', 'assets/images/characters.png', 16, 16);
 		this.load.spritesheet('dead', 'assets/images/dead.png', 16, 16);

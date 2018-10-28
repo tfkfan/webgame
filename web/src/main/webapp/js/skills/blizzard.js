@@ -9,10 +9,10 @@ Blizzard.prototype.constructor = Blizzard;
 Blizzard.prototype.run = function(a){
       var p = this.game.input.activePointer;
 
-      var rx1 = p.worldX - 100;
-      var ry1 = p.worldY - 50;
-      var rx2 = p.worldX + 100;
-      var ry2 = p.worldY + 50;
+      var rx1 = p.worldX - 50;
+      var ry1 = p.worldY - 25;
+      var rx2 = p.worldX + 50;
+      var ry2 = p.worldY + 25;
 
       var randX = getRandomNum(rx1, rx2);
       var randY = getRandomNum(ry1, ry2);
