@@ -89,7 +89,7 @@ WebGame.Game.prototype = {
         this.notificationLabel.text = this.notification;
         this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.xp + ' XP / ' + this.xpToNext + ' XP';
         this.goldLabel.text = this.gold + ' Gold';
-        this.healthLabel.text = this.player.health + ' / ' + this.player.vitality;
+
     },
 
     playerHandler: function() {
@@ -115,8 +115,8 @@ WebGame.Game.prototype = {
                 this.spellLabel.text = "RECHARGING...";
             }
 
-            if (this.player.health > this.player.vitality) {
-                this.player.health = this.player.vitality;
+            if (this.player.health > this.player.maxHealth) {
+                this.player.health = this.player.maxHealth;
             }
             if (this.xp >= this.xpToNext) {
                 this.levelUp();
@@ -218,10 +218,6 @@ WebGame.Game.prototype = {
         this.xpLabel = this.game.add.text(25, this.game.height - 25, text, style);
         this.xpLabel.fixedToCamera = true;
 
-        style = { font: '20px Arial', fill: '#f00', align: 'center' };
-        this.healthLabel = this.game.add.text(225, this.game.height - 50, text, style);
-        this.healthLabel.fixedToCamera = true;
-
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.goldLabel = this.game.add.text(this.game.width - 75, this.game.height - 25, text, style);
         this.goldLabel.fixedToCamera = true;
@@ -233,7 +229,7 @@ WebGame.Game.prototype = {
 
     levelUp: function() {
         this.player.level++;
-        this.player.vitality += 5;
+        this.player.maxHealth += 5;
         this.player.health += 5;
         this.player.strength += 1;
         this.player.speed += 1;
@@ -328,8 +324,8 @@ WebGame.Game.prototype = {
                 this.potionSound.play();
                 collectable.destroy();
             } else if (collectable.name === 'vitalityPotion') {
-                player.vitality += collectable.value;
-                this.notification = 'You consume a potion, increasing your vitality by ' + collectable.value + '!';
+                player.maxHealth += collectable.value;
+                this.notification = 'You consume a potion, increasing your maxHealth by ' + collectable.value + '!';
                 this.potionSound.play();
                 collectable.destroy();
             } else if (collectable.name === 'strengthPotion') {

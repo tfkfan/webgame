@@ -10,7 +10,7 @@ Player = function (game, x,y, spritename, name) {
    this.name = name;
    this.level = 1;
    this.health = 100;
-   this.vitality = 100;
+   this.maxHealth = 100;
    this.strength = 85;
    this.speed = 125;
    this.invincibilityFrames = 500;
@@ -18,9 +18,33 @@ Player = function (game, x,y, spritename, name) {
    this.corpseSprite = 1;
 
    this.animations.play(this.direction);
+
+   var style = { font: '14px Arial', fill: '#fff', align: 'center' };
+   this.nameLabel = this.game.add.text(this.x, this.y - 75, this.name, style);
+
+   this.hpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
+   this.emptyHpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
 };
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
+Player.prototype.update = function(){
+    Phaser.Sprite.prototype.update.call(this);
+    this.nameLabel.x = this.x + this.width/3;
+    this.nameLabel.y = this.y - 5;
+
+    var w = this.width*(this.health/this.maxHealth);
+
+    this.hpLine.x = this.x;
+    this.hpLine.y = this.y + 20;
+    this.emptyHpLine.x = this.x + w;
+    this.emptyHpLine.y = this.y + 20;
+
+    this.hpLine.width = this.width*(this.health/this.maxHealth);
+    this.emptyHpLine.width = this.width - w;
+
+    this.game.debug.geom(this.hpLine,'#008000');
+    this.game.debug.geom(this.emptyHpLine,'#ff0000');
+};
 Player.prototype.initAnimations = function(){
 };
