@@ -45,7 +45,8 @@ WebGame.Game.prototype = {
         this.generateCollectables();
         this.corpses = this.game.add.group();
         // Generate player and set camera to follow
-        this.player = this.generatePlayer();
+        this.player = new Mage(this.game, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
+        this.game.add.existing(this.player);
         this.game.camera.follow(this.player);
         this.playerAttacks = new Blizzard(this.game, 'blizzard', 'skills', 1000);
         //this.generateAttacks('staticSpell', 'skills');
@@ -62,7 +63,7 @@ WebGame.Game.prototype = {
         // Music
 		this.music = this.game.add.audio('overworldMusic');
 		this.music.loop = true;
-		this.music.play();
+		//this.music.play();
         // Sound effects
         this.generateSounds();
         // Set the controls
@@ -345,59 +346,6 @@ WebGame.Game.prototype = {
         }
     },
 
-    generatePlayer: function () {
-        var player = this.game.add.sprite(this.game.world.centerX, this.game.world.centerY, 'mage');
-        player.animations.add('up',[0,1,2,3,4], 10, true);
-        player.animations.add('upright',[5,6,7,8,9], 10, true);
-        player.animations.add('right',[10,11,12,13,14], 10, true);
-        player.animations.add('downright',[15,16,17,18,19], 10, true);
-        player.animations.add('down',[20,21,22,23,24], 10, true);
-        player.animations.add('downleft',[25,26,27,28,29], 10, true);
-        player.animations.add('left',[30,31,32,33,34], 10, true);
-        player.animations.add('upleft',[35,36,37,38,39], 10, true);
-
-        player.animations.add('upattack',[40,41,42,43], 10, false);
-        player.animations.add('uprightattack',[44,45,46,47], 10, false);
-        player.animations.add('rightattack',[48,49,50,51], 10, false);
-        player.animations.add('downrightattack',[52,53,54,55], 10, false);
-        player.animations.add('downattack',[56,57,58,59], 10, false);
-        player.animations.add('downleftattack',[56,57,58,59], 10, false);
-        player.animations.add('leftattack',[56,57,58,59], 10, false);
-        player.animations.add('upleftattack',[56,57,58,59], 10, false);
-
-        var onComplete = function () {
-             player.isAttack = false;
-             player.play(player.direction);
-        }
-
-        player.animations._anims.upattack.onComplete.add(onComplete, this);
-        player.animations._anims.uprightattack.onComplete.add(onComplete, this);
-        player.animations._anims.rightattack.onComplete.add(onComplete, this);
-        player.animations._anims.downrightattack.onComplete.add(onComplete, this);
-        player.animations._anims.downattack.onComplete.add(onComplete, this);
-        player.animations._anims.downleftattack.onComplete.add(onComplete, this);
-        player.animations._anims.leftattack.onComplete.add(onComplete, this);
-        player.animations._anims.upleftattack.onComplete.add(onComplete, this);
-
-        player.scale.setTo(2);
-        this.game.physics.arcade.enable(player);
-        player.direction = 'up';
-        player.body.collideWorldBounds = true
-        player.alive = true;
-        player.name = 'Theodoric';
-        player.level = 1;
-        player.health = 100;
-        player.vitality = 100;
-        player.strength = 85;
-        player.speed = 125;
-        player.invincibilityFrames = 500;
-        player.invincibilityTime = 0;
-        player.corpseSprite = 1;
-
-        player.animations.play(player.direction);
-        return player;
-    },
-
     setStats: function (entity, name, health, speed, strength, reward, corpseSprite) {
         entity.animations.play('down');
         entity.scale.setTo(2);
@@ -527,57 +475,6 @@ WebGame.Game.prototype = {
         }
         console.log('Generated dragon!');
         return this.setStats(boss, 'Dragon', 2000, 100, 50, 500, 0);
-    },
-
-    generateObstacles: function() {
-        this.obstacles = this.game.add.group();
-        this.obstacles.enableBody = true;
-        var amount = 300;
-        for (var i = 0; i < amount; i++) {
-            var point = this.getRandomLocation();
-            var spriteIndex = Math.floor(Math.random() * 10);
-            this.generateObstacle(point, spriteIndex);
-        }
-    },
-
-    generateObstacle: function (location, spriteIndex) {
-        obstacle = this.obstacles.create(location.x, location.y, 'tiles');
-        if (spriteIndex === 0) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        } else if (spriteIndex === 1) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        } else if (spriteIndex === 2) {
-            obstacle.animations.add('shrub', [20], 0, true);
-            obstacle.animations.play('shrub');
-        } else if (spriteIndex === 3) {
-            obstacle.animations.add('pine', [30], 0, true);
-            obstacle.animations.play('pine');
-        } else if (spriteIndex === 4) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        } else if (spriteIndex === 5) {
-            obstacle.animations.add('column', [39], 0, true);
-            obstacle.animations.play('column');
-        } else if (spriteIndex === 6) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        } else if (spriteIndex === 7) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        } else if (spriteIndex === 8) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        } else if (spriteIndex === 9) {
-            obstacle.animations.add('tree', [38], 0, true);
-            obstacle.animations.play('tree');
-        }
-        obstacle.scale.setTo(2);
-        obstacle.body.setSize(8, 8, 4, -2);
-        obstacle.body.moves = false;
-
-        return obstacle;
     },
 
     generateCollectables: function () {

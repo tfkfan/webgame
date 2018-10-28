@@ -9,7 +9,7 @@ WebGame.MainMenu.prototype = {
 	create: function () {
 		this.music = this.add.audio('openingMusic');
 		this.music.loop = true;
-		this.music.play();
+		//this.music.play();
 		this.background = this.game.add.tileSprite(0, 0, this.game.width, this.game.height, 'tiles', 92);
 
 		// Give it speed in x
