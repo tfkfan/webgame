@@ -1,5 +1,5 @@
-Mage = function (game, x,y, spritename, name) {
-   Player.call(this, game, x, y, spritename, name);
+Mage = function (gameController, x,y, spritename, name) {
+   Player.call(this, gameController, x, y, spritename, name);
 };
 
 Mage.prototype = Object.create(Player.prototype);

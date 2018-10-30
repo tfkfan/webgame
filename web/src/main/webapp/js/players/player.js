@@ -1,7 +1,7 @@
-Player = function (game, x,y, spritename, name) {
-   Phaser.Sprite.call(this, game, x, y, spritename);
-   this.initAnimations();
+Player = function (gameController, x,y, spritename, name) {
+   Phaser.Sprite.call(this, gameController.game, x, y, spritename);
 
+   this.gameController = gameController;
    this.scale.setTo(2);
    this.game.physics.arcade.enable(this);
    this.direction = 'up';
@@ -16,7 +16,10 @@ Player = function (game, x,y, spritename, name) {
    this.invincibilityFrames = 500;
    this.invincibilityTime = 0;
    this.corpseSprite = 1;
+   this.xp = 0;
+   this.xpToNext = 20;
 
+   this.initAnimations();
    this.animations.play(this.direction);
 
    var style = { font: '14px Arial', fill: '#fff', align: 'center' };
@@ -44,5 +47,25 @@ Player.prototype.update = function(){
     this.game.debug.geom(this.emptyHpLine,'#ff0000');
     this.game.debug.geom(this.hpLine,'#008000');
 };
+
+Player.prototype.levelUp = function() {
+    this.level++;
+    this.maxHealth += 5;
+    this.health += 5;
+    this.strength += 1;
+    this.speed += 1;
+    this.xp -= this.xpToNext;
+    this.xpToNext = Math.floor(this.xpToNext * 1.1);
+    this.gameController.notification = this.name + ' has advanced to level ' + this.level + '!';
+    this.gameController.levelSound.play();
+
+    var emitter = this.game.add.emitter(this.x, this.y, 100);
+    emitter.makeParticles('levelParticle');
+    emitter.minParticleSpeed.setTo(-200, -200);
+    emitter.maxParticleSpeed.setTo(200, 200);
+    emitter.gravity = 0;
+    emitter.start(true, 1000, null, 100);
+};
+
 Player.prototype.initAnimations = function(){
 };

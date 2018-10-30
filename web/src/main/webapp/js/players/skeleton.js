@@ -1,5 +1,5 @@
-Skeleton = function (game, player, corpses, name) {
-    Enemy.call(this, game, player, corpses, name);
+Skeleton = function (gameController, player, corpses, name) {
+    Enemy.call(this, gameController, player, corpses, name);
 };
 
 Skeleton.prototype = Object.create(Enemy.prototype);

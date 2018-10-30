@@ -21,11 +21,13 @@ function setStats(entity, player, name, health, speed, strength, reward, corpseS
     return entity;
 }
 
- deathHandler = function (target, corpses) {
-    var corpse = corpses.create(target.x, target.y, 'dead')
-    corpse.scale.setTo(2);
-    corpse.animations.add('idle', [target.corpseSprite], 0, true);
-    corpse.animations.play('idle');
-    corpse.lifespan = 3000;
-    target.destroy();
+
+function rng(floor, ceiling) {
+    floor /= 10;
+    ceiling /= 10;
+    var rnd = Math.random();
+    if (rnd >= floor && rnd < ceiling) {
+        return true;
+    }
+    return false;
 }

@@ -1,6 +1,7 @@
-Enemy = function (game, player, corpses, name) {
-    Phaser.Group.call(this, game);
+Enemy = function (gameController, player, corpses, name) {
+    Phaser.Group.call(this, gameController.game);
 
+    this.gameController = gameController;
     this.name = name;
     this.player = player;
     this.corpses = corpses;
@@ -37,14 +38,14 @@ Enemy.prototype.update = function(){
     }, this);
 
     this.forEachDead(function(enemy) {
-        /*if (this.rng(0, 5)) {
-            this.generateGold(enemy);
-        } else if (this.rng(0, 2)) {
-            this.generatePotion(enemy);
+        if (rng(0, 5)) {
+            this.gameController.generateGold(enemy);
+        } else if (rng(0, 2)) {
+            this.gameController.generatePotion(enemy);
             this.notification = 'The ' + enemy.name + ' dropped a potion!';
-        }*/
-        this.xp += enemy.reward;
+        }
+        this.player.xp += enemy.reward;
         this.generate();
-        deathHandler(enemy, this.corpses);
+        this.gameController.deathHandler(enemy);
     }, this);
 };

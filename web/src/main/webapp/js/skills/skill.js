@@ -1,6 +1,7 @@
-Skill = function (game, name, image, damage) {
-    Phaser.Group.call(this, game);
+Skill = function (gameController, name, image, damage) {
+    Phaser.Group.call(this, gameController.game);
 
+    this.gameController = gameController;
     this.name = name;
     this.image = image;
 
@@ -16,7 +17,6 @@ Skill = function (game, name, image, damage) {
     this.next = 0;
 
     this.createMultiple(50, this.image);
-
 };
 
 Skill.prototype = Object.create(Phaser.Group.prototype);

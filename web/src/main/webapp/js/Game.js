@@ -35,8 +35,7 @@ WebGame.Game.prototype = {
         this.notification = '';
         this.spellCooldown = 0;
         this.gold = 0;
-        this.xp = 0;
-        this.xpToNext = 20;
+
         this.goldForBoss = 1000;
         this.bossSpawned = false;
         this.bossColorIndex = 0;
@@ -45,10 +44,10 @@ WebGame.Game.prototype = {
         this.generateCollectables();
         this.corpses = this.game.add.group();
         // Generate player and set camera to follow
-        this.player = new Mage(this.game, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
+        this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
         this.game.add.existing(this.player);
         this.game.camera.follow(this.player);
-        this.playerAttacks = new Blizzard(this.game, 'blizzard', 'skills', 1000);
+        this.playerAttacks = new Blizzard(this, 'blizzard', 'skills', 1000);
         //this.generateAttacks('staticSpell', 'skills');
         //this.playerSpells = this.generateAttacks('spell');
         //this.playerSpells2 = this.generateAttacks('spell2');
@@ -86,7 +85,7 @@ WebGame.Game.prototype = {
             collectable.destroy();
         });
         this.notificationLabel.text = this.notification;
-        this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.xp + ' XP / ' + this.xpToNext + ' XP';
+        this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.player.xp + ' XP / ' + this.player.xpToNext + ' XP';
         this.goldLabel.text = this.gold + ' Gold';
         this.healthLabel.text = this.player.health + ' / ' + this.player.maxHealth;
     },
@@ -117,11 +116,10 @@ WebGame.Game.prototype = {
             if (this.player.health > this.player.maxHealth) {
                 this.player.health = this.player.maxHealth;
             }
-            if (this.xp >= this.xpToNext) {
-                this.levelUp();
-            }
+            if (this.player.xp >= this.player.xpToNext)
+                this.player.levelUp();
         }else{
-            deathHandler(this.player, this.corpses);
+            this.deathHandler(this.player);
             this.game.time.events.add(1000, this.gameOver, this);
         }
     },
@@ -155,7 +153,7 @@ WebGame.Game.prototype = {
             this.generateStrengthPotion(boss);
             this.generateSpeedPotion(boss);
             this.notification = 'The ' + boss.name + ' dropped a potion!';
-            this.xp += boss.reward;
+            this.player.xp += boss.reward;
             // Make the dragon explode
             var emitter = this.game.add.emitter(boss.x, boss.y, 100);
             emitter.makeParticles('flame');
@@ -207,24 +205,6 @@ WebGame.Game.prototype = {
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.spellLabel = this.game.add.text(230, this.game.height - 25, text, style);
         this.spellLabel.fixedToCamera = true;
-    },
-
-    levelUp: function() {
-        this.player.level++;
-        this.player.maxHealth += 5;
-        this.player.health += 5;
-        this.player.strength += 1;
-        this.player.speed += 1;
-        this.xp -= this.xpToNext;
-        this.xpToNext = Math.floor(this.xpToNext * 1.1);
-        this.notification = this.player.name + ' has advanced to level ' + this.player.level + '!';
-        this.levelSound.play();
-        var emitter = this.game.add.emitter(this.player.x, this.player.y, 100);
-        emitter.makeParticles('levelParticle');
-        emitter.minParticleSpeed.setTo(-200, -200);
-        emitter.maxParticleSpeed.setTo(200, 200);
-        emitter.gravity = 0;
-        emitter.start(true, 1000, null, 100);
     },
 
     attack: function (attacker, attacks) {
@@ -316,11 +296,10 @@ WebGame.Game.prototype = {
     },
 
     generateEnemies: function (amount) {
-        this.enemies = new Skeleton(this.game, this.player, this.corpses, 'characters');
+        this.enemies = new Skeleton(this, this.player, this.corpses, 'characters');
         for (var i = 0; i < amount; i++)
             this.enemies.generate();
     },
-
 
     generateSlime: function (enemy) {
         enemy.animations.add('down', [48, 49, 50], 10, true);
@@ -480,6 +459,15 @@ WebGame.Game.prototype = {
         return collectable;
     },
 
+     deathHandler: function(target) {
+        var corpse = this.corpses.create(target.x, target.y, 'dead')
+        corpse.scale.setTo(2);
+        corpse.animations.add('idle', [target.corpseSprite], 0, true);
+        corpse.animations.play('idle');
+        corpse.lifespan = 3000;
+        target.destroy();
+    },
+
     playSound: function (name) {
         if (name === this.player.name)
             this.playerSound.play();
@@ -621,22 +609,12 @@ WebGame.Game.prototype = {
         this.ghostSound.destroy();
         this.spiderSound.destroy();
         this.goldSound.destroy();
-        this.game.state.start('MainMenu', true, false, this.xp + this.gold);
+        this.game.state.start('MainMenu', true, false, this.player.xp + this.gold);
     },
 
     quitGame: function (pointer) {
 		this.music.stop();
-        this.game.state.start('MainMenu', true, false, this.xp + this.gold);
-    },
-
-    rng: function (floor, ceiling) {
-        floor /= 10;
-        ceiling /= 10;
-        var rnd = Math.random();
-        if (rnd >= floor && rnd < ceiling) {
-            return true;
-        }
-        return false;
+        this.game.state.start('MainMenu', true, false, this.player.xp + this.gold);
     },
 
     generateGrid: function (worldSize) {

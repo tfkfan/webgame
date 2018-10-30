@@ -1,5 +1,5 @@
-Blizzard = function (game, name, image, rate, range) {
-    Skill.call(this, game, name, image, rate, range);
+Blizzard = function (gameController, name, image, rate, range) {
+    Skill.call(this, gameController, name, image, rate, range);
     this.callAll('animations.add', 'animations', 'blizzard',
                             [0, 1, 2, 3], 10, false);
 };
@@ -22,7 +22,7 @@ Blizzard.prototype.run = function(a){
 
       a.reset(randX - 150, randY - 250);
 
-      var tween = this.game.add.tween(a).to( { x: randX, y: randY}, 500);
+      var tween = this.game.add.tween(a).to( { x: randX, y: randY}, 1000);
       tween.onComplete.add(function(){
           a.animations.play("blizzard");
           a.body.isFalling = false;
