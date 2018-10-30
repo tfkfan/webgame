@@ -14,7 +14,6 @@ Skill = function (game, name, image, damage) {
 
     this.damage = damage;
     this.next = 0;
-    this.name = name;
 
     this.createMultiple(50, this.image);
 

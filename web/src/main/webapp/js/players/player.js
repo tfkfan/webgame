@@ -33,18 +33,16 @@ Player.prototype.update = function(){
     this.nameLabel.x = this.x + this.width/3;
     this.nameLabel.y = this.y - 5;
 
-    var w = this.width*(this.health/this.maxHealth);
-
     this.hpLine.x = this.x;
     this.hpLine.y = this.y + 20;
-    this.emptyHpLine.x = this.x + w;
+    this.emptyHpLine.x = this.x;
     this.emptyHpLine.y = this.y + 20;
 
     this.hpLine.width = this.width*(this.health/this.maxHealth);
-    this.emptyHpLine.width = this.width - w;
+    this.emptyHpLine.width = this.width;
 
-    this.game.debug.geom(this.hpLine,'#008000');
     this.game.debug.geom(this.emptyHpLine,'#ff0000');
+    this.game.debug.geom(this.hpLine,'#008000');
 };
 Player.prototype.initAnimations = function(){
 };

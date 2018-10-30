@@ -80,7 +80,6 @@ WebGame.Game.prototype = {
     // Checks for actions and changes
     update: function () {
         this.playerHandler();
-        this.enemyHandler();
         this.bossHandler();
         this.collisionHandler();
         this.collectables.forEachDead(function(collectable) {
@@ -89,7 +88,7 @@ WebGame.Game.prototype = {
         this.notificationLabel.text = this.notification;
         this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.xp + ' XP / ' + this.xpToNext + ' XP';
         this.goldLabel.text = this.gold + ' Gold';
-
+        this.healthLabel.text = this.player.health + ' / ' + this.player.maxHealth;
     },
 
     playerHandler: function() {
@@ -122,30 +121,9 @@ WebGame.Game.prototype = {
                 this.levelUp();
             }
         }else{
-            this.deathHandler(this.player);
+            deathHandler(this.player, this.corpses);
             this.game.time.events.add(1000, this.gameOver, this);
         }
-    },
-
-    enemyHandler: function() {
-        this.enemies.forEachAlive(function(enemy) {
-            if (enemy.visible && enemy.inCamera) {
-                this.game.physics.arcade.moveToObject(enemy, this.player, enemy.speed)
-                this.enemyMovementHandler(enemy);
-            }
-        }, this);
-
-        this.enemies.forEachDead(function(enemy) {
-            if (this.rng(0, 5)) {
-                this.generateGold(enemy);
-            } else if (this.rng(0, 2)) {
-                this.generatePotion(enemy);
-                this.notification = 'The ' + enemy.name + ' dropped a potion!';
-            }
-            this.xp += enemy.reward;
-            this.generateEnemy(this.enemies);
-            this.deathHandler(enemy);
-        }, this);
     },
 
     bossHandler: function() {
@@ -160,7 +138,7 @@ WebGame.Game.prototype = {
         this.bosses.forEachAlive(function(boss) {
             if (boss.visible && boss.inCamera) {
                 this.game.physics.arcade.moveToObject(boss, this.player, boss.speed)
-                this.enemyMovementHandler(boss);
+                //this.enemyMovementHandler(boss);
                 this.attack(boss, this.bossAttacks);
             }
         }, this);
@@ -217,6 +195,10 @@ WebGame.Game.prototype = {
         style = { font: '10px Arial', fill: '#ffd', align: 'center' };
         this.xpLabel = this.game.add.text(25, this.game.height - 25, text, style);
         this.xpLabel.fixedToCamera = true;
+
+        style = { font: '20px Arial', fill: '#f00', align: 'center' };
+        this.healthLabel = this.game.add.text(225, this.game.height - 50, text, style);
+        this.healthLabel.fixedToCamera = true;
 
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.goldLabel = this.game.add.text(this.game.width - 75, this.game.height - 25, text, style);
@@ -293,15 +275,6 @@ WebGame.Game.prototype = {
         }
     },
 
-    deathHandler: function (target) {
-        var corpse = this.corpses.create(target.x, target.y, 'dead')
-        corpse.scale.setTo(2);
-        corpse.animations.add('idle', [target.corpseSprite], 0, true);
-        corpse.animations.play('idle');
-        corpse.lifespan = 3000;
-        target.destroy();
-    },
-
     collect: function(player, collectable) {
         if (!collectable.collected) {
             collectable.collected = true;
@@ -342,64 +315,19 @@ WebGame.Game.prototype = {
         }
     },
 
-    setStats: function (entity, name, health, speed, strength, reward, corpseSprite) {
-        entity.animations.play('down');
-        entity.scale.setTo(2);
-        entity.body.collideWorldBounds = true;
-        entity.body.velocity.x = 0,
-        entity.body.velocity.y = 0,
-        entity.alive = true;
-        entity.name = name;
-        entity.level = this.player.level;
-        entity.health = health + (entity.level * 2);
-        entity.speed = speed + Math.floor(entity.level * 1.5);;
-        entity.strength = strength + Math.floor(entity.level * 1.5);;
-        entity.reward = reward + Math.floor(entity.level * 1.5);
-        entity.invincibilityFrames = 300;
-        entity.invincibilityTime = 0;
-        entity.corpseSprite = corpseSprite;
-        return entity;
-    },
-
     generateEnemies: function (amount) {
-        this.enemies = this.game.add.group();
-        this.enemies.enableBody = true;
-        this.enemies.physicsBodyType = Phaser.Physics.ARCADE;
+        this.enemies = new Skeleton(this.game, this.player, this.corpses, 'characters');
         for (var i = 0; i < amount; i++)
-            this.generateEnemy();
+            this.enemies.generate();
     },
 
-    generateEnemy: function () {
-        enemy = this.enemies.create(this.game.world.randomX, this.game.world.randomY, 'characters');
-
-        do {
-            enemy.reset(this.game.world.randomX, this.game.world.randomY);
-        } while (Phaser.Math.distance(this.player.x, this.player.y, enemy.x, enemy.y) <= 400)
-
-        var rnd = Math.random();
-        if (rnd >= 0 && rnd < .3) enemy = this.generateSkeleton(enemy);
-        else if (rnd >= .3 && rnd < .4) enemy = this.generateSlime(enemy);
-        else if (rnd >= .4 && rnd < .6) enemy = this.generateBat(enemy);
-        else if (rnd >= .6 && rnd < .7) enemy = this.generateGhost(enemy);
-        else if (rnd >= .7 && rnd < 1) enemy = this.generateSpider(enemy);
-        console.log('Generated ' + enemy.name + ' with ' + enemy.health + ' health, ' + enemy.strength + ' strength, and ' + enemy.speed + ' speed.');
-        return enemy;
-    },
-
-    generateSkeleton: function (enemy) {
-        enemy.animations.add('down', [9, 10, 11], 10, true);
-        enemy.animations.add('left', [21, 22, 23], 10, true);
-        enemy.animations.add('right', [33, 34, 35], 10, true);
-        enemy.animations.add('up', [45, 46, 47], 10, true);
-        return this.setStats(enemy, 'Skeleton', 100, 70, 20, 5, 6);
-    },
 
     generateSlime: function (enemy) {
         enemy.animations.add('down', [48, 49, 50], 10, true);
         enemy.animations.add('left', [60, 61, 62], 10, true);
         enemy.animations.add('right', [72, 73, 74], 10, true);
         enemy.animations.add('up', [84, 85, 86], 10, true);
-        return this.setStats(enemy, 'Slime', 300, 40, 50, 10, 7);
+        return setStats(enemy, 'Slime', 300, 40, 50, 10, 7);
     },
 
     generateBat: function (enemy) {
@@ -407,7 +335,7 @@ WebGame.Game.prototype = {
         enemy.animations.add('left', [63, 64, 65], 10, true);
         enemy.animations.add('right', [75, 76, 77], 10, true);
         enemy.animations.add('up', [87, 88, 89], 10, true);
-        return this.setStats(enemy, 'Bat', 20, 200, 10, 2, 8);
+        return setStats(enemy, 'Bat', 20, 200, 10, 2, 8);
     },
 
     generateGhost: function (enemy) {
@@ -415,7 +343,7 @@ WebGame.Game.prototype = {
         enemy.animations.add('left', [66, 67, 68], 10, true);
         enemy.animations.add('right', [78, 79, 80], 10, true);
         enemy.animations.add('up', [90, 91, 92], 10, true);
-        return this.setStats(enemy, 'Ghost', 200, 60, 30, 7, 9);
+        return setStats(enemy, 'Ghost', 200, 60, 30, 7, 9);
     },
 
     generateSpider: function (enemy) {
@@ -423,7 +351,7 @@ WebGame.Game.prototype = {
         enemy.animations.add('left', [69, 70, 71], 10, true);
         enemy.animations.add('right', [81, 82, 83], 10, true);
         enemy.animations.add('up', [93, 94, 95], 10, true);
-        return this.setStats(enemy, 'Spider', 50, 120, 12, 4, 10);
+        return setStats(enemy, 'Spider', 50, 120, 12, 4, 10);
     },
 
     generateDragon: function (colorIndex) {
@@ -470,7 +398,7 @@ WebGame.Game.prototype = {
             boss.animations.add('up', [84, 85, 86], 10, true);
         }
         console.log('Generated dragon!');
-        return this.setStats(boss, 'Dragon', 2000, 100, 50, 500, 0);
+        return setStats(boss, this.player, 'Dragon', 2000, 100, 50, 500, 0);
     },
 
     generateCollectables: function () {
@@ -674,21 +602,7 @@ WebGame.Game.prototype = {
         this.player.body.velocity.y = vel.y;
     },
 
-    enemyMovementHandler: function (enemy) {
-        // Left
-        if (enemy.body.velocity.x < 0 && enemy.body.velocity.x <= -Math.abs(enemy.body.velocity.y)) {
-             enemy.animations.play('left');
-        // Right
-        } else if (enemy.body.velocity.x > 0 && enemy.body.velocity.x >= Math.abs(enemy.body.velocity.y)) {
-             enemy.animations.play('right');
-        // Up
-        } else if (enemy.body.velocity.y < 0 && enemy.body.velocity.y <= -Math.abs(enemy.body.velocity.x)) {
-            enemy.animations.play('up');
-        // Down
-        } else {
-            enemy.animations.play('down');
-        }
-    },
+
 
     gameOver: function() {
         this.background.destroy();
