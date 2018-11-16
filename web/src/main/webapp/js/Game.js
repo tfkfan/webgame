@@ -296,41 +296,9 @@ WebGame.Game.prototype = {
     },
 
     generateEnemies: function (amount) {
-        this.enemies = new Skeleton(this, this.player, this.corpses, 'characters');
+        this.enemies = new Enemies(this, this.player, this.corpses, 'characters')
         for (var i = 0; i < amount; i++)
             this.enemies.generate();
-    },
-
-    generateSlime: function (enemy) {
-        enemy.animations.add('down', [48, 49, 50], 10, true);
-        enemy.animations.add('left', [60, 61, 62], 10, true);
-        enemy.animations.add('right', [72, 73, 74], 10, true);
-        enemy.animations.add('up', [84, 85, 86], 10, true);
-        return setStats(enemy, 'Slime', 300, 40, 50, 10, 7);
-    },
-
-    generateBat: function (enemy) {
-        enemy.animations.add('down', [51, 52, 53], 10, true);
-        enemy.animations.add('left', [63, 64, 65], 10, true);
-        enemy.animations.add('right', [75, 76, 77], 10, true);
-        enemy.animations.add('up', [87, 88, 89], 10, true);
-        return setStats(enemy, 'Bat', 20, 200, 10, 2, 8);
-    },
-
-    generateGhost: function (enemy) {
-        enemy.animations.add('down', [54, 55, 56], 10, true);
-        enemy.animations.add('left', [66, 67, 68], 10, true);
-        enemy.animations.add('right', [78, 79, 80], 10, true);
-        enemy.animations.add('up', [90, 91, 92], 10, true);
-        return setStats(enemy, 'Ghost', 200, 60, 30, 7, 9);
-    },
-
-    generateSpider: function (enemy) {
-        enemy.animations.add('down', [57, 58, 59], 10, true);
-        enemy.animations.add('left', [69, 70, 71], 10, true);
-        enemy.animations.add('right', [81, 82, 83], 10, true);
-        enemy.animations.add('up', [93, 94, 95], 10, true);
-        return setStats(enemy, 'Spider', 50, 120, 12, 4, 10);
     },
 
     generateDragon: function (colorIndex) {
@@ -590,8 +558,6 @@ WebGame.Game.prototype = {
         this.player.body.velocity.y = vel.y;
     },
 
-
-
     gameOver: function() {
         this.background.destroy();
         this.corpses.destroy();
@@ -617,21 +583,7 @@ WebGame.Game.prototype = {
         this.game.state.start('MainMenu', true, false, this.player.xp + this.gold);
     },
 
-    generateGrid: function (worldSize) {
-        this.grid = [];
-        var gridSize = 32;
-        var grids = Math.floor(worldSize / gridSize);
-        for (var x = 0; x < grids; x++) {
-            for (var y = 0; y < grids; y++) {
-                var gridX = x * gridSize;
-                var gridY = y * gridSize;
-                this.grid.push({x:gridX, y:gridY});
-            }
-        }
-        this.shuffle(this.grid);
-    },
-
-    getRandomLocation: function () {
+    getRandomLocation: function() {
         var gridIndex = 0;
         var x = this.grid[gridIndex].x;
         var y = this.grid[gridIndex].y;
@@ -644,16 +596,17 @@ WebGame.Game.prototype = {
         return {x, y};
     },
 
-    shuffle: function (array) {
-       var currentIndex = array.length, temporaryValue, randomIndex ;
-       // While there remain elements to shuffle...
-       while (0 !== currentIndex) {
-            randomIndex = Math.floor(Math.random() * currentIndex);
-            currentIndex -= 1;
-            temporaryValue = array[currentIndex];
-            array[currentIndex] = array[randomIndex];
-            array[randomIndex] = temporaryValue;
-       }
-       return array;
+    generateGrid: function (worldSize) {
+        this.grid = [];
+        var gridSize = 32;
+        var grids = Math.floor(worldSize / gridSize);
+        for (var x = 0; x < grids; x++) {
+            for (var y = 0; y < grids; y++) {
+                var gridX = x * gridSize;
+                var gridY = y * gridSize;
+                this.grid.push({x:gridX, y:gridY});
+            }
+        }
+        shuffle(this.grid);
     }
 };
