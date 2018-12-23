@@ -11,8 +11,8 @@ function setStats(entity, player, health, speed, strength, reward, corpseSprite)
     entity.alive = true;
     entity.level = player.level;
     entity.health = health + (entity.level * 2);
-    entity.speed = speed + Math.floor(entity.level * 1.5);;
-    entity.strength = strength + Math.floor(entity.level * 1.5);;
+    entity.speed = speed + Math.floor(entity.level * 1.5);
+    entity.strength = strength + Math.floor(entity.level * 1.5);
     entity.reward = reward + Math.floor(entity.level * 1.5);
     entity.invincibilityFrames = 300;
     entity.invincibilityTime = 0;
@@ -21,7 +21,7 @@ function setStats(entity, player, health, speed, strength, reward, corpseSprite)
 }
 
 function shuffle(array) {
-   var currentIndex = array.length, temporaryValue, randomIndex ;
+   var currentIndex = array.length, temporaryValue, randomIndex;
    // While there remain elements to shuffle...
    while (0 !== currentIndex) {
         randomIndex = Math.floor(Math.random() * currentIndex);

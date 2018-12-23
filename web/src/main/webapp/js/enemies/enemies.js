@@ -54,9 +54,9 @@ Enemies.prototype.update = function(){
 
     this.forEachDead(function(enemy) {
         if (rng(0, 5)) {
-            this.gameController.generateGold(enemy);
+            this.gameController.collectables.generateGold(enemy);
         } else if (rng(0, 2)) {
-            this.gameController.generatePotion(enemy);
+            this.gameController.collectables.generatePotion(enemy);
             this.notification = 'The ' + enemy.name + ' dropped a potion!';
         }
         this.player.xp += enemy.reward;

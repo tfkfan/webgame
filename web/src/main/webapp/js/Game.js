@@ -41,7 +41,6 @@ WebGame.Game.prototype = {
         this.bossColorIndex = 0;
 
        // this.generateObstacles();
-        this.generateCollectables();
         this.corpses = this.game.add.group();
         // Generate player and set camera to follow
         this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
@@ -55,6 +54,8 @@ WebGame.Game.prototype = {
 
         // Generate enemies - must be generated after player and player.level
         this.generateEnemies(2);
+
+        this.generateCollectables();
         // Generate bosses
         this.bosses = this.game.add.group();
         this.bosses.enableBody = true;
@@ -140,15 +141,16 @@ WebGame.Game.prototype = {
                 this.attack(boss, this.bossAttacks);
             }
         }, this);
-        this.bosses.forEachDead(function(boss) {;
+        this.bosses.forEachDead(function(boss) {
             this.bossSpawned = false;
             if (this.bossColorIndex === 7)
                  this.bossColorIndex = 0;
             else
                 this.bossColorIndex++;
 
-            this.generateGold(boss);
-            this.generateChest(boss);
+            this.collectables.generateGold(boss);
+            this.collectables.generateChest(boss);
+
             this.generateVitalityPotion(boss);
             this.generateStrengthPotion(boss);
             this.generateSpeedPotion(boss);
@@ -296,7 +298,7 @@ WebGame.Game.prototype = {
     },
 
     generateEnemies: function (amount) {
-        this.enemies = new Enemies(this, this.player, this.corpses, 'characters')
+        this.enemies = new Enemies(this, this.player, this.corpses, 'characters');
         for (var i = 0; i < amount; i++)
             this.enemies.generate();
     },
@@ -349,82 +351,8 @@ WebGame.Game.prototype = {
     },
 
     generateCollectables: function () {
-        this.collectables = this.game.add.group();
-        this.collectables.enableBody = true;
-        this.collectables.physicsBodyType = Phaser.Physics.ARCADE;
-        var amount = 100;
-        for (var i = 0; i < amount; i++) {
-            var point = this.getRandomLocation();
-            this.generateChest(point);
-        }
-    },
-
-    generateChest: function (location) {
-        var collectable = this.collectables.create(location.x, location.y, 'things');
-        collectable.scale.setTo(2);
-        collectable.animations.add('idle', [6], 0, true);
-        collectable.animations.add('open', [18, 30, 42], 10, false);
-        collectable.animations.play('idle');
-        collectable.name = 'chest'
-        collectable.value = Math.floor(Math.random() * 150);
-        return collectable;
-    },
-
-    generateGold: function (enemy) {
-        var collectable = this.collectables.create(enemy.x, enemy.y, 'sprites');
-        collectable.animations.add('idle', [68], 0, true);
-        collectable.animations.play('idle');
-        collectable.name = 'gold';
-        collectable.value = enemy.reward * 2;
-        return collectable;
-    },
-
-    generatePotion: function (location) {
-        var rnd = Math.random();
-        if (rnd >= 0 && rnd < .7)
-            this.generateHealthPotion(location);
-        else if (rnd >= .7 && rnd < .8)
-            this.generateVitalityPotion(location);
-        else if (rnd >= .8 && rnd < .9)
-            this.generateStrengthPotion(location);
-        else if (rnd >= .9 && rnd < 1)
-            this.generateSpeedPotion(location);
-    },
-
-    generateHealthPotion: function (location) {
-        var collectable = this.collectables.create(location.x, location.y, 'potions');
-        collectable.animations.add('idle', [0], 0, true);
-        collectable.animations.play('idle');
-        collectable.name = 'healthPotion'
-        collectable.value = 20 + Math.floor(Math.random() * 10) + this.player.level;
-        return collectable;
-    },
-
-    generateVitalityPotion: function (location) {
-        var collectable = this.collectables.create(location.x, location.y, 'potions');
-        collectable.animations.add('idle', [2], 0, true);
-        collectable.animations.play('idle');
-        collectable.name = 'vitalityPotion'
-        collectable.value = 4 + Math.floor(Math.random() * 10);
-        return collectable;
-    },
-
-    generateStrengthPotion: function (location) {
-        var collectable = this.collectables.create(location.x, location.y, 'potions');
-        collectable.animations.add('idle', [3], 0, true);
-        collectable.animations.play('idle');
-        collectable.name = 'strengthPotion'
-        collectable.value = 1 + Math.floor(Math.random() * 10);
-        return collectable;
-    },
-
-    generateSpeedPotion: function (location) {
-        var collectable = this.collectables.create(location.x, location.y, 'potions');
-        collectable.animations.add('idle', [4], 0, true);
-        collectable.animations.play('idle');
-        collectable.name = 'speedPotion'
-        collectable.value = 1 + Math.floor(Math.random() * 10);
-        return collectable;
+        this.collectables = new Collectables(this, this.player, 'characters');
+        this.collectables.generateChests(100);
     },
 
      deathHandler: function(target) {
