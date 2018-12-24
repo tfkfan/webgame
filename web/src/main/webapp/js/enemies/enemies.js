@@ -1,7 +1,7 @@
-Enemies = function (gameController, player, corpses, name) {
-    Phaser.Group.call(this, gameController.game);
+Enemies = function (model, player, corpses, name) {
+    Phaser.Group.call(this, model.game);
 
-    this.gameController = gameController;
+    this.model = model;
     this.name = name;
     this.player = player;
     this.corpses = corpses;
@@ -39,11 +39,13 @@ Enemies.prototype.enemyMovementHandler = function (enemy) {
     else
         enemy.animations.play('down');
 };
+
 Enemies.prototype.generate = function(){
     var enemy = this.create(this.game.world.randomX, this.game.world.randomY, 'characters');
     console.log('Generated ' + enemy.name + ' with ' + enemy.health + ' health, ' + enemy.strength + ' strength, and ' + enemy.speed + ' speed.');
     return enemy;
 };
+
 Enemies.prototype.update = function(){
      this.forEachAlive(function(enemy) {
         if (enemy.visible && enemy.inCamera) {
@@ -54,13 +56,13 @@ Enemies.prototype.update = function(){
 
     this.forEachDead(function(enemy) {
         if (rng(0, 5)) {
-            this.gameController.collectables.generateGold(enemy);
+            this.model.collectables.generateGold(enemy);
         } else if (rng(0, 2)) {
-            this.gameController.collectables.generatePotion(enemy);
+            this.model.collectables.generatePotion(enemy);
             this.notification = 'The ' + enemy.name + ' dropped a potion!';
         }
         this.player.xp += enemy.reward;
         this.generate();
-        this.gameController.deathHandler(enemy);
+        this.model.deathHandler(enemy);
     }, this);
 };

@@ -1,7 +1,6 @@
-Collectables = function (gameController, player, name) {
-    Phaser.Group.call(this, gameController.game);
-
-    this.gameController = gameController;
+Collectables = function (model, player, name) {
+    Phaser.Group.call(this, model.game);
+    this.model = model;
     this.name = name;
     this.player = player;
 
@@ -13,7 +12,7 @@ Collectables.prototype = Object.create(Phaser.Group.prototype);
 Collectables.prototype.constructor = Collectables;
 Collectables.prototype.generateChests = function(amount){
      for (var i = 0; i < amount; i++) {
-          var point = this.gameController.getRandomLocation();
+          var point = this.model.getRandomLocation();
           var collectable = this.generateChest(point);
      }
 };
@@ -28,6 +27,12 @@ Collectables.prototype.generateChest = function (location) {
     var collectable = new Chest(this.game,location.x, location.y);
     this.add(collectable);
     return collectable;
+};
+
+Collectables.prototype.update = function(){
+    this.forEachDead(function(collectable) {
+        collectable.destroy();
+    });
 };
 
 Collectables.prototype.generatePotion = function (location) {

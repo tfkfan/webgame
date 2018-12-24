@@ -33,12 +33,10 @@ WebGame.Game.prototype = {
         this.generateGrid(worldSize);
 
         this.notification = '';
-        this.spellCooldown = 0;
+        //main game model stats
         this.gold = 0;
-
         this.goldForBoss = 1000;
         this.bossSpawned = false;
-        this.bossColorIndex = 0;
 
        // this.generateObstacles();
         this.corpses = this.game.add.group();
@@ -46,16 +44,20 @@ WebGame.Game.prototype = {
         this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
         this.game.add.existing(this.player);
         this.game.camera.follow(this.player);
-        this.playerAttacks = new Blizzard(this, 'blizzard', 'skills', 1000);
+
         //this.generateAttacks('staticSpell', 'skills');
         //this.playerSpells = this.generateAttacks('spell');
         //this.playerSpells2 = this.generateAttacks('spell2');
         this.bossAttacks = this.game.add.group();
 
         // Generate enemies - must be generated after player and player.level
-        this.generateEnemies(2);
+        this.bosses = new Bosses(this, this.player, this.corpses, 'bosses');
+        this.enemies = new Enemies(this, this.player, this.corpses, 'characters');
+        for (var i = 0; i < 2; i++)
+            this.enemies.generate();
 
-        this.generateCollectables();
+        this.collectables = new Collectables(this, this.player, 'characters');
+        this.collectables.generateChests(100);
         // Generate bosses
         this.bosses = this.game.add.group();
         this.bosses.enableBody = true;
@@ -66,122 +68,37 @@ WebGame.Game.prototype = {
 		//this.music.play();
         // Sound effects
         this.generateSounds();
-        // Set the controls
-        this.controls = {
-            up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
-            left: this.game.input.keyboard.addKey(Phaser.Keyboard.A),
-            down: this.game.input.keyboard.addKey(Phaser.Keyboard.S),
-            right: this.game.input.keyboard.addKey(Phaser.Keyboard.D),
-            spell: this.game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR)
-        };
         // Set the camera
         this.showLabels();
     },
     // Checks for actions and changes
     update: function () {
-        this.playerHandler();
-        this.bossHandler();
         this.collisionHandler();
-        this.collectables.forEachDead(function(collectable) {
-            collectable.destroy();
-        });
         this.notificationLabel.text = this.notification;
         this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.player.xp + ' XP / ' + this.player.xpToNext + ' XP';
         this.goldLabel.text = this.gold + ' Gold';
         this.healthLabel.text = this.player.health + ' / ' + this.player.maxHealth;
     },
 
-    playerHandler: function() {
-        if (this.player.alive) {
-            this.playerMovementHandler();
-            if (this.game.input.activePointer.isDown) {
-                this.playerAttacks.rate = 1000;
-                this.playerAttacks.range = this.player.strength * 3;
-                this.player.isAttack = true;
-                this.attack(this.player, this.playerAttacks);
-            }
-
-            if (this.game.time.now > this.spellCooldown) {
-                this.spellLabel.text = "READY!";
-                if (this.controls.spell.isDown) {
-                    this.playerSpells.rate = 5000;
-                    this.playerSpells.range = this.player.strength * 6;
-                    this.player.isAttack = true;
-                    this.spellCooldown = this.game.time.now + 15000;
-                    this.attack(this.player, this.playerSpells);
-                }
-            } else {
-                this.spellLabel.text = "RECHARGING...";
-            }
-
-            if (this.player.health > this.player.maxHealth) {
-                this.player.health = this.player.maxHealth;
-            }
-            if (this.player.xp >= this.player.xpToNext)
-                this.player.levelUp();
-        }else{
-            this.deathHandler(this.player);
-            this.game.time.events.add(1000, this.gameOver, this);
-        }
-    },
-
-    bossHandler: function() {
-        // Spawn boss if player obtains enough gold
-        if (this.gold > this.goldForBoss && !this.bossSpawned) {
-            this.bossSpawned = true;
-            this.goldForBoss += 1000;
-            var boss = this.generateDragon(this.bossColorIndex);
-            this.dragonSound.play();
-            this.notification = 'A ' + boss.name + ' appeared!';
-        }
-        this.bosses.forEachAlive(function(boss) {
-            if (boss.visible && boss.inCamera) {
-                this.game.physics.arcade.moveToObject(boss, this.player, boss.speed)
-                //this.enemyMovementHandler(boss);
-                this.attack(boss, this.bossAttacks);
-            }
-        }, this);
-        this.bosses.forEachDead(function(boss) {
-            this.bossSpawned = false;
-            if (this.bossColorIndex === 7)
-                 this.bossColorIndex = 0;
-            else
-                this.bossColorIndex++;
-
-            this.collectables.generateGold(boss);
-            this.collectables.generateChest(boss);
-
-            this.generateVitalityPotion(boss);
-            this.generateStrengthPotion(boss);
-            this.generateSpeedPotion(boss);
-            this.notification = 'The ' + boss.name + ' dropped a potion!';
-            this.player.xp += boss.reward;
-            // Make the dragon explode
-            var emitter = this.game.add.emitter(boss.x, boss.y, 100);
-            emitter.makeParticles('flame');
-            emitter.minParticleSpeed.setTo(-200, -200);
-            emitter.maxParticleSpeed.setTo(200, 200);
-            emitter.gravity = 0;
-            emitter.start(true, 1000, null, 100);
-
-            boss.destroy();
-        }, this);
+    levelUpHandler: function(){
+        this.notification = this.player.name + ' has advanced to level ' + this.player.level + '!';
+        this.levelSound.play();
     },
 
     collisionHandler: function() {
         this.game.physics.arcade.collide(this.player, this.enemies, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bossAttacks, this.hit, null, this);
-        this.game.physics.arcade.collide(this.bosses, this.playerAttacks, this.hit, null, this);
-        this.game.physics.arcade.collide(this.enemies, this.playerAttacks, this.hit, null, this);
-        this.game.physics.arcade.overlap(this.bosses, this.playerAttacks, this.hit, null, this);
-        this.game.physics.arcade.overlap(this.enemies, this.playerAttacks, this.hit, null, this);
+        this.game.physics.arcade.collide(this.bosses, this.player.playerAttacks, this.hit, null, this);
+        this.game.physics.arcade.collide(this.enemies, this.player.playerAttacks, this.hit, null, this);
+        this.game.physics.arcade.overlap(this.bosses, this.player.playerAttacks, this.hit, null, this);
+        this.game.physics.arcade.overlap(this.enemies, this.player.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.collide(this.bosses, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.collide(this.enemies, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.overlap(this.bosses, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.overlap(this.enemies, this.playerSpells, this.hit, null, this);
         this.game.physics.arcade.collide(this.obstacles, this.player, null, null, this);
-        this.game.physics.arcade.collide(this.obstacles, this.playerAttacks, null, null, this);
+        this.game.physics.arcade.collide(this.obstacles, this.player.playerAttacks, null, null, this);
         this.game.physics.arcade.collide(this.obstacles, this.enemies, null, null, this);
         this.game.physics.arcade.overlap(this.collectables, this.player, this.collect, null, this);
     },
@@ -203,10 +120,6 @@ WebGame.Game.prototype = {
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.goldLabel = this.game.add.text(this.game.width - 75, this.game.height - 25, text, style);
         this.goldLabel.fixedToCamera = true;
-
-        var style = { font: '10px Arial', fill: '#fff', align: 'center' };
-        this.spellLabel = this.game.add.text(230, this.game.height - 25, text, style);
-        this.spellLabel.fixedToCamera = true;
     },
 
     attack: function (attacker, attacks) {
@@ -235,7 +148,7 @@ WebGame.Game.prototype = {
     },
 
     hit: function (target, attacker) {
-        if(target === this.player && attacker.parent === this.playerAttacks){
+        if(target === this.player && attacker.parent === this.player.playerAttacks){
             return;
         }
         if (this.game.time.now > target.invincibilityTime) {
@@ -297,65 +210,7 @@ WebGame.Game.prototype = {
         }
     },
 
-    generateEnemies: function (amount) {
-        this.enemies = new Enemies(this, this.player, this.corpses, 'characters');
-        for (var i = 0; i < amount; i++)
-            this.enemies.generate();
-    },
-
-    generateDragon: function (colorIndex) {
-        var boss = this.bosses.create(this.player.x, this.player.y - 300, 'dragons');
-        if (colorIndex === 0) {
-            boss.animations.add('down', [0, 1, 2], 10, true);
-            boss.animations.add('left', [12, 13, 14], 10, true);
-            boss.animations.add('right', [24, 25, 26], 10, true);
-            boss.animations.add('up', [36, 37, 38], 10, true);
-        } else if (colorIndex === 1) {
-            boss.animations.add('down', [3, 4, 5], 10, true);
-            boss.animations.add('left', [15, 16, 17], 10, true);
-            boss.animations.add('right', [27, 28, 29], 10, true);
-            boss.animations.add('up', [39, 40, 41], 10, true);
-        } else if (colorIndex === 2) {
-            boss.animations.add('down', [6, 7, 8], 10, true);
-            boss.animations.add('left', [18, 19, 20], 10, true);
-            boss.animations.add('right', [30, 31, 32], 10, true);
-            boss.animations.add('up', [42, 43, 44], 10, true);
-        } else if (colorIndex === 3) {
-            boss.animations.add('down', [9, 10, 11], 10, true);
-            boss.animations.add('left', [21, 22, 23], 10, true);
-            boss.animations.add('right', [33, 34, 35], 10, true);
-            boss.animations.add('up', [45, 46, 47], 10, true);
-        } else if (colorIndex === 4) {
-            boss.animations.add('down', [57, 58, 59], 10, true);
-            boss.animations.add('left', [69, 70, 71], 10, true);
-            boss.animations.add('right', [81, 82, 83], 10, true);
-            boss.animations.add('up', [93, 94, 95], 10, true);
-        } else if (colorIndex === 5) {
-            boss.animations.add('down', [54, 55, 56], 10, true);
-            boss.animations.add('left', [66, 67, 68], 10, true);
-            boss.animations.add('right', [78, 79, 80], 10, true);
-            boss.animations.add('up', [90, 91, 92], 10, true);
-        } else if (colorIndex === 6) {
-            boss.animations.add('down', [51, 52, 53], 10, true);
-            boss.animations.add('left', [63, 64, 65], 10, true);
-            boss.animations.add('right', [75, 76, 77], 10, true);
-            boss.animations.add('up', [87, 88, 89], 10, true);
-        } else if (colorIndex === 7) {
-            boss.animations.add('down', [48, 49, 50], 10, true);
-            boss.animations.add('left', [60, 61, 62], 10, true);
-            boss.animations.add('right', [72, 73, 74], 10, true);
-            boss.animations.add('up', [84, 85, 86], 10, true);
-        }
-        console.log('Generated dragon!');
-        return setStats(boss, this.player, 'Dragon', 2000, 100, 50, 500, 0);
-    },
-
-    generateCollectables: function () {
-        this.collectables = new Collectables(this, this.player, 'characters');
-        this.collectables.generateChests(100);
-    },
-
-     deathHandler: function(target) {
+    deathHandler: function(target) {
         var corpse = this.corpses.create(target.x, target.y, 'dead')
         corpse.scale.setTo(2);
         corpse.animations.add('idle', [target.corpseSprite], 0, true);
@@ -396,102 +251,12 @@ WebGame.Game.prototype = {
         this.spiderSound = this.game.add.audio('spiderSound');
     },
 
-    playerMovementHandler: function () {
-        var vel = {x:0, y:0};
-
-        // Up-Left
-        if (this.controls.up.isDown && this.controls.left.isDown) {
-            vel.x = -this.player.speed;
-            vel.y = -this.player.speed;
-            this.player.direction = 'upleft';
-            if(!this.player.isAttack)
-                this.player.animations.play(this.player.direction);
-            else
-                this.player.animations.play(this.player.direction + "attack");
-        // Up-Right
-        } else if (this.controls.up.isDown && this.controls.right.isDown) {
-            vel.x = this.player.speed;
-            vel.y = -this.player.speed;
-            this.player.direction = 'upright';
-            if(!this.player.isAttack)
-                this.player.animations.play(this.player.direction);
-            else
-                this.player.animations.play(this.player.direction + "attack");
-        // Down-Left
-        } else if (this.controls.down.isDown && this.controls.left.isDown) {
-            vel.x = -this.player.speed;
-            vel.y = this.player.speed;
-            this.player.direction = 'downleft';
-            if(!this.player.isAttack)
-                this.player.animations.play(this.player.direction);
-            else
-                this.player.animations.play(this.player.direction + "attack");
-        // Down-Right
-        } else if (this.controls.down.isDown && this.controls.right.isDown) {
-            vel.x = this.player.speed;
-            vel.y = this.player.speed;
-            this.player.direction = 'downright';
-            if(!this.player.isAttack)
-               this.player.animations.play(this.player.direction);
-            else
-               this.player.animations.play(this.player.direction + "attack");
-        // Up
-        } else if (this.controls.up.isDown) {
-            vel.x = 0;
-            vel.y = -this.player.speed;
-            this.player.direction = 'up';
-            if(!this.player.isAttack)
-                 this.player.animations.play(this.player.direction);
-             else
-                 this.player.animations.play(this.player.direction + "attack");
-        // Down
-        } else if (this.controls.down.isDown) {
-            vel.x = 0;
-            vel.y = this.player.speed;
-            this.player.direction = 'down';
-            if(!this.player.isAttack)
-               this.player.animations.play(this.player.direction);
-            else
-               this.player.animations.play(this.player.direction + "attack");
-        // Left
-        } else if (this.controls.left.isDown) {
-            vel.x = -this.player.speed;
-            vel.y = 0;
-            this.player.direction = 'left';
-             if(!this.player.isAttack)
-                this.player.animations.play(this.player.direction);
-             else
-                this.player.animations.play(this.player.direction + "attack");
-        // Right
-        } else if (this.controls.right.isDown) {
-            vel.x = this.player.speed;
-            vel.y = 0;
-            this.player.direction = 'right';
-             if(!this.player.isAttack)
-                this.player.animations.play(this.player.direction);
-             else
-                this.player.animations.play(this.player.direction + "attack");
-        // Still
-        } else {
-
-            if(this.player.isAttack)
-                this.player.animations.play(this.player.direction + "attack");
-            else
-                this.player.animations.stop();
-            vel.x = 0;
-            vel.y = 0;
-        }
-
-        this.player.body.velocity.x = vel.x;
-        this.player.body.velocity.y = vel.y;
-    },
-
     gameOver: function() {
         this.background.destroy();
         this.corpses.destroy();
         this.collectables.destroy();
         this.player.destroy();
-        this.playerAttacks.destroy();
+        this.player.playerAttacks.destroy();
         this.enemies.destroy();
 		this.music.stop();
 		this.music.destroy();
