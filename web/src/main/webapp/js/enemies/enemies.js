@@ -39,7 +39,7 @@ Enemies.prototype.enemyMovementHandler = function (enemy) {
         enemy.animations.play('down');
 };
 
-Enemies.prototype.generate = function(){
+Enemies.prototype.generateOne = function(){
     var enemy = this.create(this.game.world.randomX, this.game.world.randomY, 'characters');
     console.log('Generated ' + enemy.name + ' with ' + enemy.health + ' health, ' + enemy.strength + ' strength, and ' + enemy.speed + ' speed.');
     return enemy;
@@ -47,7 +47,7 @@ Enemies.prototype.generate = function(){
 
 Enemies.prototype.generate = function(amount){
     for (var i = 0; i < amount; i++)
-        this.generate();
+        this.generateOne();
 };
 
 Enemies.prototype.update = function(){
@@ -66,7 +66,7 @@ Enemies.prototype.update = function(){
             this.notification = 'The ' + enemy.name + ' dropped a potion!';
         }
         this.player.xp += enemy.reward;
-        this.generate();
+        this.generateOne();
         this.model.deathHandler(enemy);
     }, this);
 };
