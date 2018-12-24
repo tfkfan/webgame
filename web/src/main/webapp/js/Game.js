@@ -23,55 +23,32 @@ WebGame.Game.prototype = {
         this.game.world.setBounds(0, 0, worldSize, worldSize);
         this.background = this.game.add.tilemap('worldmap');
         this.background.addTilesetImage('tiles', 'tiles');
-
         this.mainlayer = this.background.createLayer('tiles layer');
-        //this.obstacleslayer = this.background.createLayer('ground');
-            //  This resizes the game world to match the layer dimensions
         this.mainlayer.resizeWorld();
-        //this.obstacleslayer.resizeWorld();
-
         this.generateGrid(worldSize);
 
         this.notification = '';
-        //main game model stats
         this.gold = 0;
         this.goldForBoss = 1000;
-        this.bossSpawned = false;
 
-       // this.generateObstacles();
         this.corpses = this.game.add.group();
-        // Generate player and set camera to follow
         this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
+        this.bosses = new Bosses(this, this.player, 'bosses');
+        this.enemies = new Enemies(this, this.player, 'characters');
+        this.enemies.generate(2);
+        this.collectables = new Collectables(this, this.player, 'characters');
+        this.collectables.generateChests(100);
+
         this.game.add.existing(this.player);
         this.game.camera.follow(this.player);
 
-        //this.generateAttacks('staticSpell', 'skills');
-        //this.playerSpells = this.generateAttacks('spell');
-        //this.playerSpells2 = this.generateAttacks('spell2');
-        this.bossAttacks = this.game.add.group();
-
-        // Generate enemies - must be generated after player and player.level
-        this.bosses = new Bosses(this, this.player, this.corpses, 'bosses');
-        this.enemies = new Enemies(this, this.player, this.corpses, 'characters');
-        for (var i = 0; i < 2; i++)
-            this.enemies.generate();
-
-        this.collectables = new Collectables(this, this.player, 'characters');
-        this.collectables.generateChests(100);
-        // Generate bosses
-        this.bosses = this.game.add.group();
-        this.bosses.enableBody = true;
-        this.bosses.physicsBodyType = Phaser.Physics.ARCADE;
-        // Music
 		this.music = this.game.add.audio('overworldMusic');
 		this.music.loop = true;
 		//this.music.play();
-        // Sound effects
         this.generateSounds();
-        // Set the camera
         this.showLabels();
     },
-    // Checks for actions and changes
+
     update: function () {
         this.collisionHandler();
         this.notificationLabel.text = this.notification;
@@ -85,10 +62,21 @@ WebGame.Game.prototype = {
         this.levelSound.play();
     },
 
+    bossDeathHandler: function(boss){
+       this.collectables.generateGold(boss);
+       this.collectables.generateChest(boss);
+
+       this.collectables.generateVitalityPotion(boss);
+       this.collectables.generateStrengthPotion(boss);
+       this.collectables.generateSpeedPotion(boss);
+       this.notification = 'The ' + boss.name + ' dropped a potion!';
+       this.player.xp += boss.reward;
+    },
+
     collisionHandler: function() {
         this.game.physics.arcade.collide(this.player, this.enemies, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses, this.hit, null, this);
-        this.game.physics.arcade.collide(this.player, this.bossAttacks, this.hit, null, this);
+        this.game.physics.arcade.collide(this.player, this.bosses.bossAttacks, this.hit, null, this);
         this.game.physics.arcade.collide(this.bosses, this.player.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.collide(this.enemies, this.player.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.overlap(this.bosses, this.player.playerAttacks, this.hit, null, this);

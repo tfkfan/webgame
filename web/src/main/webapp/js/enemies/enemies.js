@@ -1,10 +1,9 @@
-Enemies = function (model, player, corpses, name) {
+Enemies = function (model, player, name) {
     Phaser.Group.call(this, model.game);
 
     this.model = model;
     this.name = name;
     this.player = player;
-    this.corpses = corpses;
 
     this.enableBody = true;
     this.physicsBodyType = Phaser.Physics.ARCADE;
@@ -44,6 +43,11 @@ Enemies.prototype.generate = function(){
     var enemy = this.create(this.game.world.randomX, this.game.world.randomY, 'characters');
     console.log('Generated ' + enemy.name + ' with ' + enemy.health + ' health, ' + enemy.strength + ' strength, and ' + enemy.speed + ' speed.');
     return enemy;
+};
+
+Enemies.prototype.generate = function(amount){
+    for (var i = 0; i < amount; i++)
+        this.generate();
 };
 
 Enemies.prototype.update = function(){

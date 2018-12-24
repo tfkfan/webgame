@@ -1,15 +1,17 @@
-Bosses = function (model, player, corpses, name) {
+Bosses = function (model, player,  name) {
     Phaser.Group.call(this, model.game);
 
     this.model = model;
     this.name = name;
     this.player = player;
-    this.corpses = corpses;
 
     this.enableBody = true;
     this.physicsBodyType = Phaser.Physics.ARCADE;
 
     this.bossColorIndex = 0;
+    this.bossSpawned = false;
+
+    this.bossAttacks = this.game.add.group();
 };
 
 Bosses.prototype = Object.create(Phaser.Group.prototype);
@@ -23,10 +25,12 @@ Bosses.prototype.generateDragon = function (colorIndex) {
 
 Bosses.prototype.update = function(){
     // Spawn boss if player obtains enough gold
-   if (this.model.gold > this.model.goldForBoss && !this.model.bossSpawned) {
-       this.model.bossSpawned = true;
+   if (this.model.gold > this.model.goldForBoss && !this.bossSpawned) {
+       this.bossSpawned = true;
        this.model.goldForBoss += 1000;
+
        var boss = this.generateDragon(this.bossColorIndex);
+
        this.model.dragonSound.play();
        this.model.notification = 'A ' + boss.name + ' appeared!';
    }
@@ -34,24 +38,16 @@ Bosses.prototype.update = function(){
        if (boss.visible && boss.inCamera) {
            this.game.physics.arcade.moveToObject(boss, this.player, boss.speed)
            //this.enemyMovementHandler(boss);
-           this.model.attack(boss, this.model.bossAttacks);
+           this.model.attack(boss, this.bossAttacks);
        }
    }, this);
    this.forEachDead(function(boss) {
-       this.model.bossSpawned = false;
+       this.bossSpawned = false;
        if (this.bossColorIndex === 7)
             this.bossColorIndex = 0;
        else
            this.bossColorIndex++;
 
-       this.model.collectables.generateGold(boss);
-       this.model.collectables.generateChest(boss);
-
-       this.model.collectables.generateVitalityPotion(boss);
-       this.model.collectables.generateStrengthPotion(boss);
-       this.model.collectables.generateSpeedPotion(boss);
-       this.model.notification = 'The ' + boss.name + ' dropped a potion!';
-       this.player.xp += boss.reward;
        // Make the dragon explode
        var emitter = this.game.add.emitter(boss.x, boss.y, 100);
        emitter.makeParticles('flame');
@@ -60,6 +56,7 @@ Bosses.prototype.update = function(){
        emitter.gravity = 0;
        emitter.start(true, 1000, null, 100);
 
+       this.model.bossDeathHandler(boss);
        boss.destroy();
    }, this);
 };
