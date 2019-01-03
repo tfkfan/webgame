@@ -36,7 +36,7 @@ WebGame.Game.prototype = {
         this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
         this.bosses = new Bosses(this, this.player, 'bosses');
         this.enemies = new Enemies(this, this.player, 'characters');
-        //this.enemies.generate(2);
+        this.enemies.generate(2);
         this.collectables = new Collectables(this, this.player, 'characters');
         this.collectables.generateChests(100);
 
@@ -87,7 +87,6 @@ WebGame.Game.prototype = {
     },
 
     collisionHandler: function() {
-        this.game.physics.arcade.collide(this.player, this.player.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.enemies, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses.bossAttacks, this.hit, null, this);
@@ -125,22 +124,27 @@ WebGame.Game.prototype = {
     },
 
     attack: function (attacker, attacks) {
-        if (attacker.alive && this.game.time.now > attacks.next) {
-            attacks.next = this.game.time.now + 30;
+        if (!attacker.alive || this.game.time.now < attacks.next)
+            return;
+
+        attacks.next = this.game.time.now + attacks.rate;
+        console.log(attacker.name + " used " + attacks.name + "!");
+
+        if(typeof(attacks.run) === 'function'){
+            attacks.run(attacker);
+        }else{
             var a = attacks.getFirstDead();
 
            // a.scale.setTo(1.5);
             a.name = attacker.name;
-            a.strength = attacks.rate;
+            a.strength = attacks.damage;
             a.reset(attacker.x, attacker.y);
            // a.lifespan = 10*attacks.rate;
-            console.log(attacker.name + " used " + attacks.name + "!");
-            attacks.run(a);
         }
     },
 
     hit: function (target, attacker) {
-        if(!attacker.isBuff && target === this.player && attacker.parent === this.player.playerAttacks){
+        if(attacker.parent.isBuff || target === this.player && attacker.parent === this.player.playerAttacks){
             return;
         }
         if (this.game.time.now > target.invincibilityTime) {
@@ -148,10 +152,9 @@ WebGame.Game.prototype = {
             target.damage(attacker.strength)
             if (target.health < 0)
                 target.health = 0;
-            //attacker.active = false;
             this.playSound(target.name);
             this.notification = attacker.name + ' caused ' + attacker.strength + ' damage to ' + target.name + '!';
-            if (attacker.effect === 'spell') {
+            if (attacker.name === 'blizzard') {
                 var emitter = this.game.add.emitter(attacker.x, attacker.y, 100);
                 emitter.makeParticles('spellParticle');
                 emitter.minParticleSpeed.setTo(-200, -200);

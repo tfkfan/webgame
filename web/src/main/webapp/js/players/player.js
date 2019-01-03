@@ -4,7 +4,7 @@ Player = function (model, x,y, spritename, name) {
    this.scale.setTo(2);
    this.game.physics.arcade.enable(this);
    this.direction = 'up';
-   //this.body.collideWorldBounds = true;
+   this.body.collideWorldBounds = true;
    this.alive = true;
    this.name = name;
    this.level = 1;
@@ -36,7 +36,12 @@ Player = function (model, x,y, spritename, name) {
    this.hpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
    this.emptyHpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
 
-   this.skills = [new Blizzard(this.model, 'blizzard', 'skills', 1000), new Buff(this.model, 'buff','staticSpell', 1000)];
+   this.skills = [
+      new Blizzard(this.model, 'blizzard', 'skills', 1000, 1000),
+      new Fireball(this.model, 'fireball','fireball', 500, 500),
+      new Iceblast(this.model, 'iceblast','iceblast',50, 1000),
+      new Buff(this.model, 'heal','staticSpell', 100, 500)
+   ];
    this.playerAttacks = this.skills[0];
 
    this.skillControls = this.game.input.keyboard.addKeys({
@@ -182,21 +187,12 @@ Player.prototype.update = function(){
     
     if (this.alive) {
         this.playerMovementHandler();
-        if (this.game.input.activePointer.isDown) {
-            this.playerAttacks.rate = 1000;
-            this.playerAttacks.range = this.strength * 3;
-            this.isAttack = true;
-            this.model.attack(this, this.playerAttacks);
-        }
-
-        if (this.game.time.now > this.spellCooldown) {
+        if (this.game.time.now > this.playerAttacks.spellCooldown) {
             this.cooldownLabel.text = "READY!";
-            if (this.controls.spell.isDown) {
-                this.playerSpells.rate = 5000;
-                this.playerSpells.range = this.strength * 6;
+            if (this.game.input.activePointer.isDown) {
                 this.isAttack = true;
-                this.spellCooldown = this.game.time.now + 15000;
-                this.model.attack(this, this.playerSpells);
+                this.playerAttacks.spellCooldown = this.game.time.now + this.playerAttacks.rate;
+                this.model.attack(this, this.playerAttacks);
             }
         } else {
             this.cooldownLabel.text = "RECHARGING...";
