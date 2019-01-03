@@ -14,25 +14,26 @@ Enemies.prototype.constructor = Enemies;
 Enemies.prototype.create = function(x, y, img){
     var enemy = null;
     var rnd = Math.random();
+    var level = 5;
     if (rnd >= 0 && rnd < .3)
-        enemy = setStats(new Skeleton(this.game, x, y, img), this.player, 100, 70, 20, 5, 6);
+        enemy = setStats(new Skeleton(this.game, x, y, img), level, 100, 70, 20, 5, 6);
     else if (rnd >= .3 && rnd < .4)
-        enemy = setStats(new Slime(this.game, x, y, img), this.player, 100, 70, 20, 5, 6);
+        enemy = setStats(new Slime(this.game, x, y, img), level, 100, 70, 20, 5, 6);
     else if (rnd >= .4 && rnd < .6)
-        enemy = setStats(new Bat(this.game, x, y, img), this.player, 20, 200, 10, 2, 8);
+        enemy = setStats(new Bat(this.game, x, y, img), level, 20, 200, 10, 2, 8);
     else if (rnd >= .6 && rnd < .7)
-        enemy = setStats(new Ghost(this.game, x, y, img), this.player, 200, 60, 30, 7, 9);
+        enemy = setStats(new Ghost(this.game, x, y, img), level, 200, 60, 30, 7, 9);
     else
-        enemy = setStats(new Spider(this.game, x, y, img), this.player, 50, 120, 12, 4, 10);
+        enemy = setStats(new Spider(this.game, x, y, img), level, 50, 120, 12, 4, 10);
 
     this.add(enemy);
     return enemy;
 };
 Enemies.prototype.enemyMovementHandler = function (enemy) {
     if (enemy.body.velocity.x < 0 && enemy.body.velocity.x <= -Math.abs(enemy.body.velocity.y))
-         enemy.animations.play('left');
+        enemy.animations.play('left');
     else if (enemy.body.velocity.x > 0 && enemy.body.velocity.x >= Math.abs(enemy.body.velocity.y))
-         enemy.animations.play('right');
+        enemy.animations.play('right');
     else if (enemy.body.velocity.y < 0 && enemy.body.velocity.y <= -Math.abs(enemy.body.velocity.x))
         enemy.animations.play('up');
     else
@@ -51,6 +52,7 @@ Enemies.prototype.generate = function(amount){
 };
 
 Enemies.prototype.update = function(){
+    Phaser.Group.prototype.update.call(this);
      this.forEachAlive(function(enemy) {
         if (enemy.visible && enemy.inCamera) {
             this.game.physics.arcade.moveToObject(enemy, this.player, enemy.speed)
@@ -59,14 +61,6 @@ Enemies.prototype.update = function(){
     }, this);
 
     this.forEachDead(function(enemy) {
-        if (rng(0, 5)) {
-            this.model.collectables.generateGold(enemy);
-        } else if (rng(0, 2)) {
-            this.model.collectables.generatePotion(enemy);
-            this.notification = 'The ' + enemy.name + ' dropped a potion!';
-        }
-        this.player.xp += enemy.reward;
-        this.generateOne();
-        this.model.deathHandler(enemy);
+       this.model.enemyDeathHandler(enemy);
     }, this);
 };

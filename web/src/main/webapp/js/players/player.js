@@ -4,7 +4,7 @@ Player = function (model, x,y, spritename, name) {
    this.scale.setTo(2);
    this.game.physics.arcade.enable(this);
    this.direction = 'up';
-   this.body.collideWorldBounds = true
+   //this.body.collideWorldBounds = true;
    this.alive = true;
    this.name = name;
    this.level = 1;
@@ -26,13 +26,35 @@ Player = function (model, x,y, spritename, name) {
    this.nameLabel = this.game.add.text(this.x, this.y - 75, this.name, style);
 
    style = { font: '10px Arial', fill: '#fff', align: 'center' };
-   this.spellLabel = this.game.add.text(230, this.game.height - 25, text, style);
-   this.spellLabel.fixedToCamera = true;
+   this.cooldownLabel = this.game.add.text(230, this.game.height - 25, text, style);
+   this.cooldownLabel.fixedToCamera = true;
+   
+   style = { font: '10px Arial', fill: '#fff', align: 'center' };
+   this.skillLabel = this.game.add.text(270, this.game.height - 25, '', style);
+   this.skillLabel.fixedToCamera = true;
 
    this.hpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
    this.emptyHpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
 
-   this.playerAttacks = new Blizzard(this, 'blizzard', 'skills', 1000);
+   this.skills = [new Blizzard(this.model, 'blizzard', 'skills', 1000), new Buff(this.model, 'buff','staticSpell', 1000)];
+   this.playerAttacks = this.skills[0];
+
+   this.skillControls = this.game.input.keyboard.addKeys({
+        0:Phaser.Keyboard.ONE,
+        1:Phaser.Keyboard.TWO,
+        2:Phaser.Keyboard.THREE,
+        3:Phaser.Keyboard.FOUR,
+        4:Phaser.Keyboard.FIVE,
+        5:Phaser.Keyboard.SIX,
+        6:Phaser.Keyboard.SEVEN,
+        7:Phaser.Keyboard.EIGHT,
+        8:Phaser.Keyboard.NINE,
+        9:Phaser.Keyboard.ZERO
+   });
+
+   for(var number in this.skillControls) {
+        this.skillControls[number].onDown.add(this.onSkillSelected, this);
+   }
 
    this.controls = {
        up: this.game.input.keyboard.addKey(Phaser.Keyboard.W),
@@ -45,6 +67,13 @@ Player = function (model, x,y, spritename, name) {
 
 Player.prototype = Object.create(Phaser.Sprite.prototype);
 Player.prototype.constructor = Player;
+
+Player.prototype.onSkillSelected = function(key){
+    var index = key.keyCode - 49;
+    if(index >= 0 && index <= 9 && index < this.skills.length){
+        this.playerAttacks = this.skills[index];
+    }
+};
 
 Player.prototype.playerMovementHandler = function () {
     var vel = {x:0, y:0};
@@ -161,7 +190,7 @@ Player.prototype.update = function(){
         }
 
         if (this.game.time.now > this.spellCooldown) {
-            this.spellLabel.text = "READY!";
+            this.cooldownLabel.text = "READY!";
             if (this.controls.spell.isDown) {
                 this.playerSpells.rate = 5000;
                 this.playerSpells.range = this.strength * 6;
@@ -170,7 +199,7 @@ Player.prototype.update = function(){
                 this.model.attack(this, this.playerSpells);
             }
         } else {
-            this.spellLabel.text = "RECHARGING...";
+            this.cooldownLabel.text = "RECHARGING...";
         }
 
         if (this.health > this.maxHealth) {

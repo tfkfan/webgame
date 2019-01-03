@@ -1,7 +1,7 @@
-Skill = function (gameController, name, image, damage) {
-    Phaser.Group.call(this, gameController.game);
+Skill = function (model, name, image, rate) {
+    Phaser.Group.call(this, model.game);
 
-    this.gameController = gameController;
+    this.model = model;
     this.name = name;
     this.image = image;
 
@@ -13,14 +13,17 @@ Skill = function (gameController, name, image, damage) {
     this.setAll('outOfBoundsKill', true);
     this.setAll('checkWorldBounds', true);
 
-    this.damage = damage;
+    this.rate = rate;
     this.next = 0;
+    this.isBuff = false;
 
-    this.createMultiple(50, this.image);
+    this.createMultiple(20, this.image);
 };
 
 Skill.prototype = Object.create(Phaser.Group.prototype);
 Skill.prototype.constructor = Skill;
+Skill.prototype.update = function(){
+    Phaser.Group.prototype.update.call(this);
+};
 Skill.prototype.run = function(a){
-
 };

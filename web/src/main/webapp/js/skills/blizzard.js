@@ -1,5 +1,5 @@
-Blizzard = function (gameController, name, image, rate, range) {
-    Skill.call(this, gameController, name, image, rate, range);
+Blizzard = function (model, name, image, rate) {
+    Skill.call(this, model, name, image, rate);
     this.callAll('animations.add', 'animations', 'blizzard',
                             [0, 1, 2, 3], 10, false);
 };
@@ -34,6 +34,4 @@ Blizzard.prototype.run = function(a){
           }, this);
       }, this);
       tween.start();
-
-     // a.animations.play("blizzard0");
 };

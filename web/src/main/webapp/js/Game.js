@@ -32,10 +32,11 @@ WebGame.Game.prototype = {
         this.goldForBoss = 1000;
 
         this.corpses = this.game.add.group();
+
         this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
         this.bosses = new Bosses(this, this.player, 'bosses');
         this.enemies = new Enemies(this, this.player, 'characters');
-        this.enemies.generate(2);
+        //this.enemies.generate(2);
         this.collectables = new Collectables(this, this.player, 'characters');
         this.collectables.generateChests(100);
 
@@ -62,6 +63,18 @@ WebGame.Game.prototype = {
         this.levelSound.play();
     },
 
+    enemyDeathHandler : function(enemy){
+        if (rng(0, 5)) {
+            this.collectables.generateGold(enemy);
+        } else if (rng(0, 2)) {
+            this.collectables.generatePotion(enemy);
+            this.notification = 'The ' + enemy.name + ' dropped a potion!';
+        }
+        this.player.xp += enemy.reward;
+        this.enemies.generateOne();
+        this.deathHandler(enemy);
+    },
+
     bossDeathHandler: function(boss){
        this.collectables.generateGold(boss);
        this.collectables.generateChest(boss);
@@ -74,6 +87,7 @@ WebGame.Game.prototype = {
     },
 
     collisionHandler: function() {
+        this.game.physics.arcade.collide(this.player, this.player.playerAttacks, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.enemies, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses, this.hit, null, this);
         this.game.physics.arcade.collide(this.player, this.bosses.bossAttacks, this.hit, null, this);
@@ -117,26 +131,16 @@ WebGame.Game.prototype = {
 
            // a.scale.setTo(1.5);
             a.name = attacker.name;
-            a.strength = attacks.damage;
+            a.strength = attacks.rate;
             a.reset(attacker.x, attacker.y);
            // a.lifespan = 10*attacks.rate;
             console.log(attacker.name + " used " + attacks.name + "!");
-
             attacks.run(a);
-            /* else if (attacks.name === 'spell') {
-               // a.rotation = this.game.physics.arcade.moveToPointer(a, attacks.range);
-                a.effect = 'spell';
-                a.strength *= 6;
-                this.fireballSound.play();
-            } else if (attacks.name === 'fireball') {
-                a.rotation = this.game.physics.arcade.moveToObject(a, this.player, attacks.range);
-                this.fireballSound.play();
-            }*/
         }
     },
 
     hit: function (target, attacker) {
-        if(target === this.player && attacker.parent === this.player.playerAttacks){
+        if(!attacker.isBuff && target === this.player && attacker.parent === this.player.playerAttacks){
             return;
         }
         if (this.game.time.now > target.invincibilityTime) {

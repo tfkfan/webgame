@@ -2,14 +2,14 @@ function getRandomNum(min, max) {
     return Math.random() * (max - min) + min;
 }
 
-function setStats(entity, player, health, speed, strength, reward, corpseSprite) {
+function setStats(entity, level, health, speed, strength, reward, corpseSprite) {
     entity.animations.play('down');
     entity.scale.setTo(2);
     entity.body.collideWorldBounds = true;
     entity.body.velocity.x = 0,
     entity.body.velocity.y = 0,
     entity.alive = true;
-    entity.level = player.level;
+    entity.level = level;
     entity.health = health + (entity.level * 2);
     entity.speed = speed + Math.floor(entity.level * 1.5);
     entity.strength = strength + Math.floor(entity.level * 1.5);
