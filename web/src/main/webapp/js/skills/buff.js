@@ -8,18 +8,14 @@ Buff = function (model, name, image, damage, rate) {
 
 Buff.prototype = Object.create(Skill.prototype);
 Buff.prototype.constructor = Buff;
-Buff.prototype.update = function(){
-    Skill.prototype.update.call(this);
-    this.forEachAlive(function(skill) {
-       skill.x = this.model.player.x - this.model.player.height/3;
-       skill.y = this.model.player.y;
-    }, this);
+Buff.prototype.onUpdate = function(skill){
+   skill.x = this.model.player.x - this.model.player.height/3;
+   skill.y = this.model.player.y;
 };
-Buff.prototype.run = function(attacker){
-    var skill = Skill.prototype.run.call(this, attacker);
-    skill.lifespan = 19*100;
-    skill.body.enable = true;
+Buff.prototype.onStart = function(attacker, skill, activePointer){
+    skill.body.enable = false;
     skill.animations.play("superBuff");
 
     attacker.health += this.rate;
+    return skill;
 };

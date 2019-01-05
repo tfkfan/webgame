@@ -33,7 +33,7 @@ WebGame.Game.prototype = {
 
         this.corpses = this.game.add.group();
 
-        this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','artemka');
+        this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','FrostMage');
         this.bosses = new Bosses(this, this.player, 'bosses');
         this.enemies = new Enemies(this, this.player, 'characters');
         this.enemies.generate(2);
@@ -43,11 +43,13 @@ WebGame.Game.prototype = {
         this.game.add.existing(this.player);
         this.game.camera.follow(this.player);
 
+        this.targetRect = new Phaser.Rectangle(0, 0, 20, 20);
+
 		this.music = this.game.add.audio('overworldMusic');
 		this.music.loop = true;
 		//this.music.play();
         this.generateSounds();
-        this.showLabels();
+        this.showInfos();
     },
 
     update: function () {
@@ -104,7 +106,7 @@ WebGame.Game.prototype = {
         this.game.physics.arcade.overlap(this.collectables, this.player, this.collect, null, this);
     },
 
-    showLabels: function() {
+    showInfos: function() {
         var text = '0';
         style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.notificationLabel = this.game.add.text(25, 25, text, style);

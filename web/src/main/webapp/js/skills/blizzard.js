@@ -2,44 +2,42 @@ Blizzard = function (model, name, image, damage, rate) {
     Skill.call(this, model, name, image, damage, rate);
     this.callAll('animations.add', 'animations', 'blizzard',
                             [0, 1, 2, 3], 10, false);
+    this.frames = 20;
+    this.delay = 10;
 };
 
 Blizzard.prototype = Object.create(Skill.prototype);
 Blizzard.prototype.constructor = Blizzard;
-Blizzard.prototype.run = function(attacker){
-      var p = this.game.input.activePointer;
+Blizzard.prototype.onCustomAnimationComplete = function(skill, event){
+     Skill.prototype.onCustomAnimationComplete.call(this,skill, event);
+     skill.body.isFalling = true;
+};
+Blizzard.prototype.onStart = function(attacker, skill, target){
+     var rx1 = target.x - 50;
+     var ry1 = target.y - 25;
+     var rx2 = target.x + 50;
+     var ry2 = target.y + 25;
 
-      var rx1 = p.worldX - 50;
-      var ry1 = p.worldY - 25;
-      var rx2 = p.worldX + 50;
-      var ry2 = p.worldY + 25;
+     var _THIS = this;
 
-      var _THIS = this;
-      this.start(0, 20, 10, function(){
-         var randX = getRandomNum(rx1, rx2);
-         var randY = getRandomNum(ry1, ry2);
-         var a = _THIS.getFirstDead();
+     var randX = getRandomNum(rx1, rx2);
+     var randY = getRandomNum(ry1, ry2);
 
-         // a.scale.setTo(1.5);
-         a.name = _THIS.name;
-         a.strength = _THIS.damage;
-         a.reset(attacker.x, attacker.y);
-         if(a.body.isFalling === undefined || a.body.isFalling)
-            a.body.enable = false;
+     if(skill.body.isFalling === undefined || skill.body.isFalling)
+        skill.body.enable = false;
 
-         a.reset(randX - 150, randY - 250);
+     skill.reset(randX - 150, randY - 250);
 
-         var tween = _THIS.game.add.tween(a).to( { x: randX, y: randY}, 1000);
-         tween.onComplete.add(function(){
-             a.animations.play("blizzard");
-             a.body.isFalling = false;
-             a.body.enable = true;
-             a.events.onAnimationComplete.add(function(event){
-                 event.kill();
-                 a.animations.stop(null, true);
-                 a.body.isFalling = true;
-             }, _THIS);
+     var tween = _THIS.game.add.tween(skill).to( { x: randX, y: randY}, 1000);
+     tween.onComplete.add(function(){
+         skill.animations.play("blizzard");
+         skill.body.isFalling = false;
+         skill.body.enable = true;
+         skill.events.onAnimationComplete.add(function(event){
+             _THIS.onCustomAnimationComplete(skill, event);
          }, _THIS);
-         tween.start();
-      });
+     }, _THIS);
+     tween.start();
+
+     return skill;
 };

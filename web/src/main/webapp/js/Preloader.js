@@ -6,9 +6,9 @@ WebGame.Preloader = function (game) {
 
 WebGame.Preloader.prototype = {
 	preload: function () {
-		this.splash = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'logo');
-		this.splash.anchor.setTo(0.5);
-		this.preloadBar = this.add.sprite(this.game.world.centerX, this.game.world.centerY + 128, 'preloaderBar');
+		//this.splash = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'logo');
+		//this.splash.anchor.setTo(0.5);
+		this.preloadBar = this.add.sprite(this.game.world.centerX, this.game.world.centerY, 'preloaderBar');
 		this.preloadBar.anchor.setTo(0.5);
 
 		this.load.setPreloadSprite(this.preloadBar);

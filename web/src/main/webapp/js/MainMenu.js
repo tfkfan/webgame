@@ -14,8 +14,8 @@ WebGame.MainMenu.prototype = {
 
 		// Give it speed in x
 		this.background.autoScroll(-20, 0);
-		this.splash = this.add.image(this.game.width/2,this.game.height/2, 'logo');
-		this.splash.anchor.setTo(0.5);
+		//this.splash = this.add.image(this.game.width/2,this.game.height/2, 'logo');
+		//this.splash.anchor.setTo(0.5);
 
         // High score
         text = "High score: "+this.highestScore;

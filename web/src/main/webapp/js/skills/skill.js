@@ -18,9 +18,14 @@ Skill = function (model, name, image, damage, rate) {
     this.next = 0;
     this.isBuff = false;
     this.isStatic = false;
+    this.isAnimated = true;
     this.spellCooldown = 0;
 
     this.createMultiple(20, this.image);
+    this.frames = 1;
+    this.delay = 0;
+
+    this.lifespan = 3000;
 };
 
 Skill.prototype = Object.create(Phaser.Group.prototype);
@@ -35,20 +40,39 @@ Skill.prototype.start = function(counter, limit, delay, callback){
        }, delay);
    }
 };
+Skill.prototype.onStart = function(attacker, skill){
+    return skill;
+};
+Skill.prototype.onUpdate = function(skill){
+};
+Skill.prototype.onCustomAnimationComplete = function(skill, event){
+    event.kill();
+    skill.animations.stop(null, true);
+};
 Skill.prototype.update = function(){
     Phaser.Group.prototype.update.call(this);
+    var _THIS = this;
     this.forEachAlive(function(skill) {
-       this.game.debug.spriteBounds(skill);
+       _THIS.game.debug.spriteBounds(skill);
+       _THIS.onUpdate(skill);
     }, this);
 };
 Skill.prototype.run = function(attacker){
-   var a = this.getFirstDead();
+    var _THIS = this;
+    var p = this.game.input.activePointer;
+    var target = {x : p.worldX, y : p.worldY};
+    this.start(0, this.frames, this.delay, function(){
+        var skill = _THIS.getFirstDead();
 
-   // a.scale.setTo(1.5);
-    a.name = this.name;
-    a.strength = this.damage;
-    a.reset(attacker.x, attacker.y);
-
-    return a;
-   // a.lifespan = 10*attacks.rate;
+        skill.lifespan = _THIS.lifespan;
+        skill.name = _THIS.name;
+        skill.strength = _THIS.damage;
+        skill.reset(attacker.x, attacker.y);
+        if(_THIS.isAnimated){
+            skill.events.onAnimationComplete.add(function(event){
+                _THIS.onCustomAnimationComplete(skill, event);
+             }, _THIS);
+        }
+        _THIS.onStart(attacker, skill, target);
+    });
 };
