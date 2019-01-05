@@ -74,3 +74,6 @@ Skill.prototype.run = function(attacker, target){
         _THIS.onStart(attacker, skill, target);
     });
 };
+Skill.prototype.onCollide = function(skill, target){
+
+};

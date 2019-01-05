@@ -187,7 +187,10 @@ WebGame.Game.prototype = {
             return;
         if (this.game.time.now > target.invincibilityTime) {
             target.invincibilityTime = this.game.time.now + target.invincibilityFrames;
-            target.damage(attacker.strength)
+            target.damage(attacker.strength);
+            if(typeof(attacker.parent.onCollide)==='function'){
+                attacker.parent.onCollide(attacker, target);
+            }
             if (target.health < 0)
                 target.health = 0;
             this.playSound(target.name);
