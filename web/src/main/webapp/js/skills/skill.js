@@ -65,7 +65,7 @@ Skill.prototype.run = function(attacker, target){
         skill.lifespan = _THIS.lifespan;
         skill.name = _THIS.name;
         skill.strength = _THIS.damage;
-        skill.reset(attacker.x, attacker.y);
+        skill.reset(attacker.x + attacker.width/2, attacker.y + attacker.height/2);
         if(_THIS.isAnimated){
             skill.events.onAnimationComplete.add(function(event){
                 _THIS.onCustomAnimationComplete(skill, event);
