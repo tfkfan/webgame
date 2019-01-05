@@ -53,7 +53,7 @@ Skill.prototype.update = function(){
     Phaser.Group.prototype.update.call(this);
     var _THIS = this;
     this.forEachAlive(function(skill) {
-       _THIS.game.debug.spriteBounds(skill);
+      // _THIS.game.debug.spriteBounds(skill);
        _THIS.onUpdate(skill);
     }, this);
 };

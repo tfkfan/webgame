@@ -32,6 +32,7 @@ WebGame.Preloader.prototype = {
 		this.load.spritesheet('potions', 'assets/images/potions.png', 16, 16);
 		this.load.spritesheet('dragons', 'assets/images/dragons.png', 32, 32);
 		this.load.spritesheet('spell', 'assets/images/spell.png', 12, 12);
+		this.load.spritesheet('dragonFireball', 'assets/images/fireball.png', 16, 16);
 		this.load.spritesheet('fireball', 'assets/skillsheets/fire_002.png', 900, 800);
 		this.load.spritesheet('iceblast', 'assets/skillsheets/s7.png', 255,130);
 		this.load.spritesheet('staticSpell', 'assets/skillsheets/cast_004.png', 190, 192);

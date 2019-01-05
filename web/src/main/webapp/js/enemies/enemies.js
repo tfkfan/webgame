@@ -51,16 +51,27 @@ Enemies.prototype.generate = function(amount){
         this.generateOne();
 };
 
+Enemies.prototype.onAliveEnemyUpdate = function(enemy){
+    this.game.physics.arcade.moveToObject(enemy, this.player, enemy.speed)
+    this.enemyMovementHandler(enemy);
+};
+Enemies.prototype.onEnemyDeath = function(enemy){
+   this.model.enemyDeathHandler(enemy);
+};
+Enemies.prototype.onEnemyUpdate = function(){
+};
+
 Enemies.prototype.update = function(){
     Phaser.Group.prototype.update.call(this);
-     this.forEachAlive(function(enemy) {
+    var _THIS = this;
+    this.onEnemyUpdate();
+    this.forEachAlive(function(enemy) {
         if (enemy.visible && enemy.inCamera) {
-            this.game.physics.arcade.moveToObject(enemy, this.player, enemy.speed)
-            this.enemyMovementHandler(enemy);
+            _THIS.onAliveEnemyUpdate(enemy);
         }
     }, this);
 
     this.forEachDead(function(enemy) {
-       this.model.enemyDeathHandler(enemy);
+       _THIS.onEnemyDeath(enemy);
     }, this);
 };
