@@ -3,7 +3,6 @@ Fireball = function (model, name, image, damage, rate) {
     this.callAll('animations.add', 'animations', 'superFireball',
                             [0], 10, false);
     this.isAnimated = false;
-
     this.absoluteVelocity = 1000;
 };
 
@@ -14,12 +13,6 @@ Fireball.prototype.onUpdate = function(skill){
     skill.body.velocity.y = skill.customVelocity.y;
 };
 Fireball.prototype.onStart = function(attacker, skill, target){
-
-    this.px = target.x;
-    this.py = target.y;
-
-    skill.lifespan = 2000;
-
     var velocity = new Phaser.Point(target.x - skill.x, target.y - skill.y);
     velocity = velocity.normalize();
     velocity = velocity.multiply( this.absoluteVelocity,  this.absoluteVelocity);
@@ -28,7 +21,5 @@ Fireball.prototype.onStart = function(attacker, skill, target){
     skill.scale.setTo(0.03);
     skill.body.enable = true;
     skill.animations.play("superFireball");
-
-    this.game.physics.arcade.moveToObject(skill, this.game.input.activePointer, 1000);
     return skill;
 };

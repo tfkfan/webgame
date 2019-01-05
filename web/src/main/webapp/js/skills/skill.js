@@ -57,10 +57,8 @@ Skill.prototype.update = function(){
        _THIS.onUpdate(skill);
     }, this);
 };
-Skill.prototype.run = function(attacker){
+Skill.prototype.run = function(attacker, target){
     var _THIS = this;
-    var p = this.game.input.activePointer;
-    var target = {x : p.worldX, y : p.worldY};
     this.start(0, this.frames, this.delay, function(){
         var skill = _THIS.getFirstDead();
 

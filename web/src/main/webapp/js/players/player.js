@@ -22,20 +22,6 @@ Player = function (model, x,y, spritename, name) {
    this.initAnimations();
    this.animations.play(this.direction);
 
-   var style = { font: '14px Arial', fill: '#fff', align: 'center' };
-   this.nameLabel = this.game.add.text(this.x, this.y - 75, this.name, style);
-
-   style = { font: '10px Arial', fill: '#fff', align: 'center' };
-   this.cooldownLabel = this.game.add.text(230, this.game.height - 25, text, style);
-   this.cooldownLabel.fixedToCamera = true;
-   
-   style = { font: '10px Arial', fill: '#fff', align: 'center' };
-   this.skillLabel = this.game.add.text(270, this.game.height - 25, '', style);
-   this.skillLabel.fixedToCamera = true;
-
-   this.hpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
-   this.emptyHpLine = new Phaser.Rectangle(this.x, this.y - 75, this.width, 5);
-
    this.skills = [
       new Blizzard(this.model, 'blizzard', 'skills', 1000, 1000),
       new Fireball(this.model, 'fireball','fireball', 500, 500),
@@ -168,34 +154,22 @@ Player.prototype.playerMovementHandler = function () {
     this.body.velocity.x = vel.x;
     this.body.velocity.y = vel.y;
 };
-    
+Player.prototype.isReady = function(){
+    return this.game.time.now > this.playerAttacks.spellCooldown;
+};
 Player.prototype.update = function(){
     Phaser.Sprite.prototype.update.call(this);
-    this.nameLabel.x = this.x + this.width/3;
-    this.nameLabel.y = this.y - 5;
 
-    this.hpLine.x = this.x;
-    this.hpLine.y = this.y + 20;
-    this.emptyHpLine.x = this.x;
-    this.emptyHpLine.y = this.y + 20;
-
-    this.hpLine.width = this.width*(this.health/this.maxHealth);
-    this.emptyHpLine.width = this.width;
-
-    this.game.debug.geom(this.emptyHpLine,'#ff0000');
-    this.game.debug.geom(this.hpLine,'#008000');
-    
     if (this.alive) {
         this.playerMovementHandler();
-        if (this.game.time.now > this.playerAttacks.spellCooldown) {
-            this.cooldownLabel.text = "READY!";
-            if (this.game.input.activePointer.isDown) {
-                this.isAttack = true;
-                this.playerAttacks.spellCooldown = this.game.time.now + this.playerAttacks.rate;
-                this.model.attack(this, this.playerAttacks);
-            }
-        } else {
-            this.cooldownLabel.text = "RECHARGING...";
+
+        if (this.isReady() && this.game.input.activePointer.isDown) {
+            this.isAttack = true;
+            this.playerAttacks.spellCooldown = this.game.time.now + this.playerAttacks.rate;
+
+            var p = this.game.input.activePointer;
+            var target = {x : p.worldX, y : p.worldY};
+            this.model.attack(this, this.playerAttacks, target);
         }
 
         if (this.health > this.maxHealth) {

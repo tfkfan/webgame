@@ -9,14 +9,12 @@ Iceblast.prototype.constructor = Iceblast;
 Iceblast.prototype.onStart = function(attacker, skill, target){
     skill.scale.setTo(1);
     skill.body.enable = true;
-    skill.animations.play("superIceblast");
-
     skill.height = skill.width;
     skill.x = target.x - skill.width/2;
     skill.y = target.y - skill.height/2;
-
     skill.body.immovable = true;
     skill.body.moves = false;
+    skill.animations.play("superIceblast");
 
     return skill;
 };

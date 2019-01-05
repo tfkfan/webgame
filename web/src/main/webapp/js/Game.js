@@ -54,10 +54,34 @@ WebGame.Game.prototype = {
 
     update: function () {
         this.collisionHandler();
+        this.infoHandler();
+    },
+
+    infoHandler: function(){
         this.notificationLabel.text = this.notification;
         this.xpLabel.text = 'Lvl. ' + this.player.level + ' - ' + this.player.xp + ' XP / ' + this.player.xpToNext + ' XP';
         this.goldLabel.text = this.gold + ' Gold';
         this.healthLabel.text = this.player.health + ' / ' + this.player.maxHealth;
+
+        this.nameLabel.x = this.player.x + this.player.width/3;
+        this.nameLabel.y = this.player.y - 5;
+
+        this.hpLine.x = this.player.x;
+        this.hpLine.y = this.player.y + 20;
+        this.emptyHpLine.x = this.player.x;
+        this.emptyHpLine.y = this.player.y + 20;
+
+        this.hpLine.width = this.player.width*(this.player.health/this.player.maxHealth);
+        this.emptyHpLine.width = this.player.width;
+
+        this.game.debug.geom(this.emptyHpLine,'#ff0000');
+        this.game.debug.geom(this.hpLine,'#008000');
+
+        if (this.player.isReady()) {
+            this.cooldownLabel.text = "READY!";
+        }else{
+            this.cooldownLabel.text = "RECHARGING...";
+        }
     },
 
     levelUpHandler: function(){
@@ -123,9 +147,23 @@ WebGame.Game.prototype = {
         var style = { font: '10px Arial', fill: '#fff', align: 'center' };
         this.goldLabel = this.game.add.text(this.game.width - 75, this.game.height - 25, text, style);
         this.goldLabel.fixedToCamera = true;
+
+        var style = { font: '14px Arial', fill: '#fff', align: 'center' };
+        this.nameLabel = this.game.add.text(this.x, this.y - 75, this.player.name, style);
+
+        var style = { font: '10px Arial', fill: '#fff', align: 'center' };
+        this.cooldownLabel = this.game.add.text(230, this.game.height - 25, text, style);
+        this.cooldownLabel.fixedToCamera = true;
+
+        var style = { font: '10px Arial', fill: '#fff', align: 'center' };
+        this.skillLabel = this.game.add.text(270, this.game.height - 25, '', style);
+        this.skillLabel.fixedToCamera = true;
+
+        this.hpLine = new Phaser.Rectangle(this.player.x, this.player.y - 75, this.player.width, 5);
+        this.emptyHpLine = new Phaser.Rectangle(this.player.x, this.player.y - 75, this.player.width, 5);
     },
 
-    attack: function (attacker, attacks) {
+    attack: function (attacker, attacks, target) {
         if (!attacker.alive || this.game.time.now < attacks.next)
             return;
 
@@ -133,22 +171,20 @@ WebGame.Game.prototype = {
         console.log(attacker.name + " used " + attacks.name + "!");
 
         if(typeof(attacks.run) === 'function'){
-            attacks.run(attacker);
+            attacks.run(attacker, target);
         }else{
             var a = attacks.getFirstDead();
 
-           // a.scale.setTo(1.5);
             a.name = attacker.name;
             a.strength = attacks.damage;
             a.reset(attacker.x, attacker.y);
-           // a.lifespan = 10*attacks.rate;
+            a.lifespan = 10*attacks.rate;
         }
     },
 
     hit: function (target, attacker) {
-        if(attacker.parent.isBuff || target === this.player && attacker.parent === this.player.playerAttacks){
+        if(attacker.parent.isBuff || target === this.player && attacker.parent === this.player.playerAttacks)
             return;
-        }
         if (this.game.time.now > target.invincibilityTime) {
             target.invincibilityTime = this.game.time.now + target.invincibilityFrames;
             target.damage(attacker.strength)
