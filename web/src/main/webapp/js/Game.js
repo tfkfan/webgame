@@ -187,22 +187,23 @@ WebGame.Game.prototype = {
             return;
         if (this.game.time.now > target.invincibilityTime) {
             target.invincibilityTime = this.game.time.now + target.invincibilityFrames;
-            target.damage(attacker.strength);
-            if(typeof(attacker.parent.onCollide)==='function'){
+            var resistance = target.resistance !== undefined ? target.resistance : 0;
+            target.damage(attacker.strength - resistance);
+            if(typeof(attacker.parent.onCollide)==='function')
                 attacker.parent.onCollide(attacker, target);
-            }
+
             if (target.health < 0)
                 target.health = 0;
             this.playSound(target.name);
             this.notification = attacker.name + ' caused ' + attacker.strength + ' damage to ' + target.name + '!';
-            if (attacker.name === 'blizzard') {
+         /*   if (attacker.name === 'fireball') {
                 var emitter = this.game.add.emitter(attacker.x, attacker.y, 100);
                 emitter.makeParticles('spellParticle');
                 emitter.minParticleSpeed.setTo(-200, -200);
                 emitter.maxParticleSpeed.setTo(200, 200);
                 emitter.gravity = 0;
                 emitter.start(true, 1000, null, 100);
-            }
+            }*/
         }
     },
 

@@ -10,6 +10,7 @@ Player = function (model, x,y, spritename, name) {
    this.level = 1;
    this.health = 100;
    this.maxHealth = 100;
+   this.resistance = 0;
    this.strength = 85;
    this.speed = 125;
    this.invincibilityFrames = 500;
@@ -26,7 +27,8 @@ Player = function (model, x,y, spritename, name) {
       new Blizzard(this.model, 'blizzard', 'skills', 1000, 1000),
       new Fireball(this.model, 'fireball','fireball', 500, 500),
       new Iceblast(this.model, 'iceblast','iceblast',50, 1000),
-      new Buff(this.model, 'heal','staticSpell', 100, 500)
+      new Heal(this.model, 'heal','staticSpell', 100, 500),
+      new Icebolt(this.model, 'icebolt','icebolt',500, 1000)
    ];
    this.playerAttacks = this.skills[0];
 
@@ -188,7 +190,8 @@ Player.prototype.levelUp = function() {
     this.maxHealth += 5;
     this.health += 5;
     this.strength += 1;
-    this.speed += 1;
+    this.speed += 5;
+    this.resistance +=1;
     this.xp -= this.xpToNext;
     this.xpToNext = Math.floor(this.xpToNext * 1.1);
 

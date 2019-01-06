@@ -25,6 +25,8 @@ Skill = function (model, name, image, damage, rate) {
     this.frames = 1;
     this.delay = 0;
 
+    this.level = 1;
+
     this.lifespan = 3000;
 };
 

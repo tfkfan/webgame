@@ -34,8 +34,10 @@ WebGame.Preloader.prototype = {
 		this.load.spritesheet('spell', 'assets/images/spell.png', 12, 12);
 		this.load.spritesheet('dragonFireball', 'assets/images/fireball.png', 16, 16);
 		this.load.spritesheet('fireball', 'assets/skillsheets/fire_002.png', 900, 800);
+        this.load.spritesheet('icebolt', 'assets/skillsheets/ice_003.png', 640, 538);
 		this.load.spritesheet('iceblast', 'assets/skillsheets/s7.png', 255,130);
         this.load.spritesheet('fireballBlast', 'assets/skillsheets/s001.png', 191, 192);
+        this.load.spritesheet('iceboltBlast', 'assets/skillsheets/ice_002.png', 191, 192);
 		this.load.spritesheet('staticSpell', 'assets/skillsheets/cast_004.png', 191, 192);
 
 		this.load.audio('openingMusic', 'assets/sound/opening.ogg');
