@@ -13,10 +13,10 @@ FallingSkill.prototype.onCustomAnimationComplete = function(skill, event){
 FallingSkill.prototype.onTweenComplete = function(skill){
 };
 FallingSkill.prototype.onStart = function(attacker, skill, target){
-     var rx1 = target.x - 50;
-     var ry1 = target.y - 25;
-     var rx2 = target.x + 50;
-     var ry2 = target.y + 25;
+     var rx1 = target.x - 75;
+     var ry1 = target.y - 50;
+     var rx2 = target.x + 75;
+     var ry2 = target.y + 50;
 
      var _THIS = this;
 
