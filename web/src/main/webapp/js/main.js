@@ -7,6 +7,7 @@ WebGame.game = new Phaser.Game(1200, 800, Phaser.AUTO, '', null, false, false);
 WebGame.game.state.add('Boot', WebGame.Boot);
 WebGame.game.state.add('Preloader', WebGame.Preloader);
 WebGame.game.state.add('MainMenu', WebGame.MainMenu);
+WebGame.game.state.add('LoginMenu', WebGame.LoginMenu);
 WebGame.game.state.add('Game', WebGame.Game);
 
 WebGame.game.state.start('Boot');

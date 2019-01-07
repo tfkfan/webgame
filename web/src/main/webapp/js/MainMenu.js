@@ -39,7 +39,7 @@ WebGame.MainMenu.prototype = {
 
 	startGame: function (pointer) {
 		this.music.stop();
-		this.state.start('Game');
+		this.state.start('LoginMenu');
 	},
 
 	shutdown: function() {

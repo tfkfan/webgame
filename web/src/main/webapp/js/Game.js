@@ -18,6 +18,10 @@ WebGame.Game = function (game) {
 };
 
 WebGame.Game.prototype = {
+    init: function(context) {
+        this.context = context;
+    },
+
     create: function () {
         var worldSize = 1920;
         this.game.world.setBounds(0, 0, worldSize, worldSize);
@@ -33,7 +37,7 @@ WebGame.Game.prototype = {
 
         this.corpses = this.game.add.group();
 
-        this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage','FrostMage');
+        this.player = new Mage(this, this.game.world.centerX, this.game.world.centerY, 'mage', this.context.playerName);
         this.bosses = new Bosses(this, this.player, 'bosses');
         this.enemies = new Enemies(this, this.player, 'characters');
         this.enemies.generate(2);
